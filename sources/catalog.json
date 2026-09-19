@@ -1,0 +1,389 @@
+[
+  {
+    "id": "g1-geral",
+    "title": "G1 — Notícias",
+    "homepage": "https://g1.globo.com",
+    "feed": "https://g1.globo.com/rss/g1/",
+    "language": "pt-BR",
+    "topics": ["geral", "politica", "economia", "mundo"],
+    "region": "BR"
+  },
+  {
+    "id": "g1-tecnologia",
+    "title": "G1 — Tecnologia",
+    "homepage": "https://g1.globo.com/tecnologia",
+    "feed": "https://g1.globo.com/rss/g1/tecnologia/",
+    "language": "pt-BR",
+    "topics": ["tecnologia", "ciencia", "games"],
+    "region": "BR"
+  },
+  {
+    "id": "g1-economia",
+    "title": "G1 — Economia",
+    "homepage": "https://g1.globo.com/economia",
+    "feed": "https://g1.globo.com/rss/g1/economia/",
+    "language": "pt-BR",
+    "topics": ["economia", "politica"],
+    "region": "BR"
+  },
+  {
+    "id": "g1-ciencia",
+    "title": "G1 — Ciência e Saúde",
+    "homepage": "https://g1.globo.com/ciencia-e-saude",
+    "feed": "https://g1.globo.com/rss/g1/ciencia-e-saude/",
+    "language": "pt-BR",
+    "topics": ["ciencia", "saude"],
+    "region": "BR"
+  },
+  {
+    "id": "tecnoblog",
+    "title": "Tecnoblog",
+    "homepage": "https://tecnoblog.net",
+    "feed": "https://tecnoblog.net/feed/",
+    "language": "pt-BR",
+    "topics": ["tecnologia", "games", "ciencia"],
+    "region": "BR"
+  },
+  {
+    "id": "canaltech",
+    "title": "Canaltech",
+    "homepage": "https://canaltech.com.br",
+    "feed": "https://canaltech.com.br/rss/",
+    "language": "pt-BR",
+    "topics": ["tecnologia", "ciencia", "games", "cultura"],
+    "region": "BR"
+  },
+  {
+    "id": "olhar-digital",
+    "title": "Olhar Digital",
+    "homepage": "https://olhardigital.com.br",
+    "feed": "https://olhardigital.com.br/feed/",
+    "language": "pt-BR",
+    "topics": ["tecnologia", "ciencia", "games"],
+    "region": "BR"
+  },
+  {
+    "id": "uol-noticias",
+    "title": "UOL Notícias",
+    "homepage": "https://noticias.uol.com.br",
+    "feed": "https://rss.uol.com.br/feed/noticias.xml",
+    "language": "pt-BR",
+    "topics": ["geral", "politica", "mundo"],
+    "region": "BR"
+  },
+  {
+    "id": "uol-economia",
+    "title": "UOL Economia",
+    "homepage": "https://economia.uol.com.br",
+    "feed": "https://rss.uol.com.br/feed/economia.xml",
+    "language": "pt-BR",
+    "topics": ["economia"],
+    "region": "BR"
+  },
+  {
+    "id": "uol-esporte",
+    "title": "UOL Esporte",
+    "homepage": "https://www.uol.com.br/esporte",
+    "feed": "https://rss.uol.com.br/feed/esporte.xml",
+    "language": "pt-BR",
+    "topics": ["esportes"],
+    "region": "BR"
+  },
+  {
+    "id": "infomoney",
+    "title": "InfoMoney",
+    "homepage": "https://www.infomoney.com.br",
+    "feed": "https://www.infomoney.com.br/feed/",
+    "language": "pt-BR",
+    "topics": ["economia", "politica"],
+    "region": "BR"
+  },
+  {
+    "id": "bbc-brasil",
+    "title": "BBC News Brasil",
+    "homepage": "https://www.bbc.com/portuguese",
+    "feed": "https://feeds.bbci.co.uk/portuguese/rss.xml",
+    "language": "pt-BR",
+    "topics": ["mundo", "geral", "ciencia", "saude", "politica"],
+    "region": "BR"
+  },
+  {
+    "id": "adrenaline",
+    "title": "Adrenaline",
+    "homepage": "https://www.adrenaline.com.br",
+    "feed": "https://www.adrenaline.com.br/feed/",
+    "language": "pt-BR",
+    "topics": ["games", "tecnologia"],
+    "region": "BR"
+  },
+  {
+    "id": "ign-brasil",
+    "title": "IGN Brasil",
+    "homepage": "https://br.ign.com",
+    "feed": "https://br.ign.com/feed.xml",
+    "language": "pt-BR",
+    "topics": ["games", "cultura", "tecnologia"],
+    "region": "BR"
+  },
+  {
+    "id": "folha-mundo",
+    "title": "Folha de S.Paulo — Mundo",
+    "homepage": "https://www1.folha.uol.com.br/mundo/",
+    "feed": "https://feeds.folha.uol.com.br/mundo/rss091.xml",
+    "language": "pt-BR",
+    "topics": ["mundo", "politica"],
+    "region": "BR"
+  },
+  {
+    "id": "folha-mercado",
+    "title": "Folha de S.Paulo — Mercado",
+    "homepage": "https://www1.folha.uol.com.br/mercado/",
+    "feed": "https://feeds.folha.uol.com.br/mercado/rss091.xml",
+    "language": "pt-BR",
+    "topics": ["economia"],
+    "region": "BR"
+  },
+  {
+    "id": "ge-globo",
+    "title": "ge.globo — Esportes",
+    "homepage": "https://ge.globo.com",
+    "feed": "https://ge.globo.com/rss/ge/",
+    "language": "pt-BR",
+    "topics": ["esportes"],
+    "region": "BR"
+  },
+  {
+    "id": "superinteressante",
+    "title": "Superinteressante",
+    "homepage": "https://super.abril.com.br",
+    "feed": "https://super.abril.com.br/feed/",
+    "language": "pt-BR",
+    "topics": ["ciencia", "cultura", "saude"],
+    "region": "BR"
+  },
+  {
+    "id": "agencia-brasil",
+    "title": "Agência Brasil",
+    "homepage": "https://agenciabrasil.ebc.com.br",
+    "feed": "https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml",
+    "language": "pt-BR",
+    "topics": ["geral", "politica", "economia", "mundo", "ciencia"],
+    "region": "BR"
+  },
+  {
+    "id": "macmagazine",
+    "title": "MacMagazine",
+    "homepage": "https://macmagazine.com.br",
+    "feed": "https://macmagazine.com.br/feed/",
+    "language": "pt-BR",
+    "topics": ["tecnologia"],
+    "region": "BR"
+  },
+  {
+    "id": "tudocelular",
+    "title": "TudoCelular",
+    "homepage": "https://www.tudocelular.com",
+    "feed": "https://www.tudocelular.com/rss/",
+    "language": "pt-BR",
+    "topics": ["tecnologia", "games"],
+    "region": "BR"
+  },
+  {
+    "id": "diolinux",
+    "title": "Diolinux",
+    "homepage": "https://diolinux.com.br",
+    "feed": "https://diolinux.com.br/feed",
+    "language": "pt-BR",
+    "topics": ["tecnologia", "games"],
+    "region": "BR"
+  },
+  {
+    "id": "brazil-journal",
+    "title": "Brazil Journal",
+    "homepage": "https://braziljournal.com",
+    "feed": "https://braziljournal.com/feed/",
+    "language": "pt-BR",
+    "topics": ["economia"],
+    "region": "BR"
+  },
+  {
+    "id": "money-times",
+    "title": "Money Times",
+    "homepage": "https://www.moneytimes.com.br",
+    "feed": "https://www.moneytimes.com.br/feed/",
+    "language": "pt-BR",
+    "topics": ["economia"],
+    "region": "BR"
+  },
+  {
+    "id": "the-verge",
+    "title": "The Verge",
+    "homepage": "https://www.theverge.com",
+    "feed": "https://www.theverge.com/rss/index.xml",
+    "language": "en-US",
+    "topics": ["tecnologia", "ciencia", "games", "cultura"],
+    "region": "US"
+  },
+  {
+    "id": "techcrunch",
+    "title": "TechCrunch",
+    "homepage": "https://techcrunch.com",
+    "feed": "https://techcrunch.com/feed/",
+    "language": "en-US",
+    "topics": ["tecnologia", "economia"],
+    "region": "US"
+  },
+  {
+    "id": "ars-technica",
+    "title": "Ars Technica",
+    "homepage": "https://arstechnica.com",
+    "feed": "https://feeds.arstechnica.com/arstechnica/index",
+    "language": "en-US",
+    "topics": ["tecnologia", "ciencia", "cultura"],
+    "region": "US"
+  },
+  {
+    "id": "wired",
+    "title": "Wired",
+    "homepage": "https://www.wired.com",
+    "feed": "https://www.wired.com/feed/rss",
+    "language": "en-US",
+    "topics": ["tecnologia", "ciencia", "cultura"],
+    "region": "US"
+  },
+  {
+    "id": "bbc-news",
+    "title": "BBC World News",
+    "homepage": "https://www.bbc.com/news",
+    "feed": "https://feeds.bbci.co.uk/news/world/rss.xml",
+    "language": "en-US",
+    "topics": ["mundo", "geral", "politica"],
+    "region": "GB"
+  },
+  {
+    "id": "reuters-world",
+    "title": "Reuters — World",
+    "homepage": "https://www.reuters.com",
+    "feed": "https://www.reutersagency.com/feed/?best-topics=world&post_type=best",
+    "language": "en-US",
+    "topics": ["mundo", "politica", "economia"],
+    "region": "US"
+  },
+  {
+    "id": "polygon",
+    "title": "Polygon",
+    "homepage": "https://www.polygon.com",
+    "feed": "https://www.polygon.com/rss/index.xml",
+    "language": "en-US",
+    "topics": ["games", "cultura"],
+    "region": "US"
+  },
+  {
+    "id": "nature-news",
+    "title": "Nature — News",
+    "homepage": "https://www.nature.com",
+    "feed": "https://www.nature.com/nature.rss",
+    "language": "en-US",
+    "topics": ["ciencia", "saude"],
+    "region": "GB"
+  },
+  {
+    "id": "elpais-america",
+    "title": "El País — América",
+    "homepage": "https://elpais.com/america/",
+    "feed": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/america/portada",
+    "language": "es",
+    "topics": ["mundo", "politica", "cultura", "geral"],
+    "region": "ES"
+  },
+  {
+    "id": "bbc-mundo",
+    "title": "BBC News Mundo",
+    "homepage": "https://www.bbc.com/mundo",
+    "feed": "https://feeds.bbci.co.uk/mundo/rss.xml",
+    "language": "es",
+    "topics": ["mundo", "geral", "ciencia", "saude"],
+    "region": "ES"
+  },
+  {
+    "id": "xataka",
+    "title": "Xataka",
+    "homepage": "https://www.xataka.com",
+    "feed": "https://feeds.weblogssl.com/xataka2",
+    "language": "es",
+    "topics": ["tecnologia", "ciencia", "games"],
+    "region": "ES"
+  },
+  {
+    "id": "lemonde-une",
+    "title": "Le Monde",
+    "homepage": "https://www.lemonde.fr",
+    "feed": "https://www.lemonde.fr/rss/une.xml",
+    "language": "fr",
+    "topics": ["mundo", "politica", "economia", "geral"],
+    "region": "FR"
+  },
+  {
+    "id": "france24-fr",
+    "title": "France 24",
+    "homepage": "https://www.france24.com/fr/",
+    "feed": "https://www.france24.com/fr/rss",
+    "language": "fr",
+    "topics": ["mundo", "politica", "geral"],
+    "region": "FR"
+  },
+  {
+    "id": "numerama",
+    "title": "Numerama",
+    "homepage": "https://www.numerama.com",
+    "feed": "https://www.numerama.com/feed/",
+    "language": "fr",
+    "topics": ["tecnologia", "ciencia", "cultura"],
+    "region": "FR"
+  },
+  {
+    "id": "spiegel-international",
+    "title": "Der Spiegel",
+    "homepage": "https://www.spiegel.de/international",
+    "feed": "https://www.spiegel.de/international/index.rss",
+    "language": "de",
+    "topics": ["mundo", "politica", "economia"],
+    "region": "DE"
+  },
+  {
+    "id": "tagesschau",
+    "title": "Tagesschau",
+    "homepage": "https://www.tagesschau.de",
+    "feed": "https://www.tagesschau.de/xml/rss2/",
+    "language": "de",
+    "topics": ["mundo", "politica", "geral"],
+    "region": "DE"
+  },
+  {
+    "id": "heise-online",
+    "title": "Heise Online",
+    "homepage": "https://www.heise.de",
+    "feed": "https://www.heise.de/rss/heise-atom.xml",
+    "language": "de",
+    "topics": ["tecnologia", "ciencia"],
+    "region": "DE"
+  },
+  {
+    "id": "corriere-esteri",
+    "title": "Corriere della Sera",
+    "homepage": "https://www.corriere.it",
+    "feed": "https://xml2.corriereobjects.it/rss/esteri.xml",
+    "language": "it",
+    "topics": ["mundo", "politica", "geral"],
+    "region": "IT"
+  },
+  {
+    "id": "ansa-notizie",
+    "title": "ANSA.it",
+    "homepage": "https://www.ansa.it",
+    "feed": "https://www.ansa.it/sito/notizie/topnews/topnews_rss.xml",
+    "language": "it",
+    "topics": ["mundo", "politica", "geral"],
+    "region": "IT"
+  }
+]

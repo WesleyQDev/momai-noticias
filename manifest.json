@@ -1,0 +1,310 @@
+{
+  "id": "momai-noticias",
+  "name": "MomAI Notícias",
+  "version": "1.0.0",
+  "category": "news",
+  "tags": ["noticias", "news", "rss", "feed", "discover", "artigos", "jornais"],
+  "author": "WesleyQDev",
+  "is_official": true,
+  "description": "Feed de notícias inteligente estilo Google Discover: onboarding por idioma e interesses, RSS curado, fontes personalizadas e busca.",
+  "icon_bg": "#0284c7",
+  "app_icon": "app.png",
+  "icon": "icon.png",
+  "sidebar_icon": "icon.png",
+  "sidebar": true,
+  "background": true,
+  "backgroundScript": "dist/runtime.js",
+  "permissions": [
+    "network"
+  ],
+  "sdkVersion": 1,
+  "momai_compat": ">=1.13.0",
+  "readme": {
+    "pt-BR": "README.md",
+    "en-US": "README.en-US.md",
+    "es": "README.es.md",
+    "fr": "README.fr.md",
+    "de": "README.de.md",
+    "it": "README.it.md"
+  },
+  "locales": {
+    "pt-BR": {
+      "name": "MomAI Notícias",
+      "description": "Feed de notícias inteligente estilo Google Discover: onboarding por idioma e interesses, RSS curado, fontes personalizadas e busca.",
+      "category": "news",
+      "tags": ["notícias", "noticias", "rss", "feed", "discover", "artigos", "jornais", "informação"]
+    },
+    "en-US": {
+      "name": "MomAI News",
+      "description": "Smart Google Discover-style news feed: onboarding by language and interests, curated RSS, custom sources, and search.",
+      "category": "news",
+      "tags": ["news", "rss", "feed", "discover", "articles", "journalism", "headlines"]
+    },
+    "es": {
+      "name": "MomAI Noticias",
+      "description": "Feed de noticias inteligente estilo Google Discover: onboarding por idioma e intereses, RSS curado, fuentes personalizadas y búsqueda.",
+      "category": "news",
+      "tags": ["noticias", "rss", "feed", "discover", "artículos", "periódicos", "titulares"]
+    },
+    "fr": {
+      "name": "MomAI Actualités",
+      "description": "Flux d'actualités intelligent style Google Discover : intégration par langue et centres d'intérêt, flux RSS personnalisés et recherche.",
+      "category": "news",
+      "tags": ["actualités", "nouvelles", "rss", "flux", "discover", "articles", "journaux"]
+    },
+    "de": {
+      "name": "MomAI Nachrichten",
+      "description": "Intelligenter Newsfeed im Google Discover-Stil: Onboarding nach Sprache und Interessen, kuratiertes RSS, eigene Quellen und Suche.",
+      "category": "news",
+      "tags": ["nachrichten", "news", "rss", "feed", "discover", "artikel", "zeitungen"]
+    },
+    "it": {
+      "name": "MomAI Notizie",
+      "description": "Feed di notizie intelligente stile Google Discover: onboarding per lingua e interessi, RSS curato, fonti personalizzate e ricerca.",
+      "category": "news",
+      "tags": ["notizie", "news", "rss", "feed", "discover", "articoli", "giornali"]
+    }
+  },
+  "ui": {
+    "page": "dist/page.js",
+    "pageType": "momai-noticias-page",
+    "panel": "dist/panel.js",
+    "panelType": "momai-noticias-panel",
+    "widgets": [
+      {
+        "id": "headlines",
+        "name": "Notícias — Recomendadas",
+        "description": "Notícia recomendada com foto, renovada a cada exibição",
+        "entry": "dist/widget-headlines.js",
+        "type": "momai-noticias-headlines-widget",
+        "defaultSize": "compact_2x1",
+        "supportsTransparency": true
+      }
+    ]
+  },
+  "eventTypes": {
+    "news_feed_updated": {
+      "label": "Feed de Notícias Atualizado",
+      "priority": 20,
+      "fields": {
+        "count": { "label": "Total de Notícias", "type": "number" },
+        "batchIndex": { "label": "Lote", "type": "number" }
+      }
+    },
+    "news_breaking_alert": {
+      "label": "Notícia Urgente / Destaque",
+      "priority": 80,
+      "fields": {
+        "title": { "label": "Título", "type": "string" },
+        "sourceName": { "label": "Fonte", "type": "string" },
+        "url": { "label": "Link", "type": "string" }
+      }
+    },
+    "news_article_saved": {
+      "label": "Artigo Salvo",
+      "priority": 50,
+      "fields": {
+        "articleId": { "label": "ID do Artigo", "type": "string" },
+        "title": { "label": "Título", "type": "string" }
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "get_feed",
+      "label": "Obter Feed de Notícias",
+      "description": "Retorna o feed personalizado ou filtrado por tópico/idioma com base nos interesses do usuário.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "description": "Tópico específico (ex: 'tecnologia', 'economia', 'ciencia', 'politica', 'esportes', 'games', 'cultura', 'mundo')"
+          },
+          "language": {
+            "type": "string",
+            "description": "Código do idioma (ex: 'pt-BR', 'en-US', 'es')"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Quantidade máxima de notícias (padrão: 40, máx: 100)"
+          },
+          "onlyFollowed": {
+            "type": "boolean",
+            "description": "Se true, filtra apenas fontes seguidas explicitamente"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_news",
+      "label": "Pesquisar Notícias",
+      "description": "Pesquisa artigos de notícias no catálogo e índice local por palavra-chave ou termo.",
+      "parameters": {
+        "type": "object",
+        "required": ["query"],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Termo ou palavra-chave para buscar no título e resumo das notícias"
+          },
+          "topic": {
+            "type": "string",
+            "description": "Filtro opcional de tópico"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Quantidade máxima de resultados (padrão: 10)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_briefing",
+      "label": "Obter Resumo/Briefing Diário",
+      "description": "Retorna um resumo das principais notícias do dia agrupadas por tópicos de interesse.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "limitPerTopic": {
+            "type": "number",
+            "description": "Quantidade de notícias por tópico (padrão: 3)"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_sources",
+      "label": "Listar Fontes de Notícias",
+      "description": "Lista todas as fontes de notícias disponíveis no catálogo e fontes personalizadas do usuário.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "description": "Filtrar por idioma (ex: 'pt-BR', 'en-US')"
+          }
+        }
+      }
+    },
+    {
+      "name": "add_custom_source",
+      "label": "Adicionar Fonte Personalizada",
+      "description": "Adiciona uma nova fonte de notícias a partir de URL do site ou feed RSS.",
+      "parameters": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL do site ou do feed RSS/Atom"
+          },
+          "title": {
+            "type": "string",
+            "description": "Nome personalizado para a fonte (opcional)"
+          },
+          "language": {
+            "type": "string",
+            "description": "Idioma da fonte (ex: 'pt-BR')"
+          }
+        }
+      }
+    },
+    {
+      "name": "save_article",
+      "label": "Salvar Artigo para Depois",
+      "description": "Salva uma notícia na lista de artigos salvos do usuário.",
+      "parameters": {
+        "type": "object",
+        "required": ["articleId"],
+        "properties": {
+          "articleId": {
+            "type": "string",
+            "description": "ID do artigo a ser salvo"
+          }
+        }
+      }
+    },
+    {
+      "name": "remove_saved_article",
+      "label": "Remover Artigo Salvo",
+      "description": "Remove uma notícia da lista de salvos.",
+      "parameters": {
+        "type": "object",
+        "required": ["articleId"],
+        "properties": {
+          "articleId": {
+            "type": "string",
+            "description": "ID do artigo a ser removido"
+          }
+        }
+      }
+    }
+  ],
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/feed",
+      "tool": "get_feed"
+    },
+    {
+      "method": "GET",
+      "path": "/search",
+      "tool": "search_news"
+    },
+    {
+      "method": "GET",
+      "path": "/briefing",
+      "tool": "get_briefing"
+    },
+    {
+      "method": "GET",
+      "path": "/sources",
+      "tool": "list_sources"
+    },
+    {
+      "method": "POST",
+      "path": "/sources",
+      "tool": "add_custom_source"
+    },
+    {
+      "method": "POST",
+      "path": "/saved",
+      "tool": "save_article"
+    },
+    {
+      "method": "DELETE",
+      "path": "/saved",
+      "tool": "remove_saved_article"
+    }
+  ],
+  "storage": {
+    "description": "Perfil de leitura, tópicos favoritos, histórico de artigos salvos e cache local de feeds.",
+    "locations": [
+      "momai.storage: news_user_profile (idiomas, interesses, fontes seguidas e bloqueadas, termos silenciados, afinidade)",
+      "momai.storage: news_seen_articles (conjunto de artigos visualizados recentemente)",
+      "momai.collections: saved_articles (artigos marcados para ler depois)",
+      "momai.collections: feed_cache (cache persistente de artigos dos feeds)"
+    ],
+    "collections": [
+      {
+        "name": "saved_articles",
+        "indexes": ["id", "url", "sourceId", "savedAt"],
+        "unique": "id"
+      },
+      {
+        "name": "feed_cache",
+        "indexes": ["id", "url", "sourceId", "publishedAt", "language"],
+        "unique": "id"
+      }
+    ]
+  },
+  "theme": {
+    "gradient": "from-sky-600 to-cyan-500",
+    "accent": "cyan"
+  },
+  "toolPriority": {
+    "label": "NOTICIAS",
+    "rule": "consultar notícias, manchetes do dia, resumo de acontecimentos, feed Discover ou pesquisar artigos jornalísticos."
+  }
+}
