@@ -22,9 +22,18 @@ const DICTIONARIES: Record<string, any> = {
 
 export function getAppLocale(): string {
   try {
-    const raw = sdk?.locale || (window as any)?.MomAISDK?.locale || navigator?.language || 'pt-BR'
+    const raw =
+      (window as any)?.__MOMAI_LOCALE__ ||
+      localStorage.getItem('momai_locale') ||
+      sdk?.locale ||
+      (window as any)?.MomAISDK?.locale ||
+      document?.documentElement?.lang ||
+      navigator?.language ||
+      'pt-BR'
     if (DICTIONARIES[raw]) return raw
-    const prefix = raw.split('-')[0]
+    const prefix = String(raw).split('-')[0]
+    if (prefix === 'en') return 'en-US'
+    if (prefix === 'pt') return 'pt-BR'
     if (DICTIONARIES[prefix]) return prefix
   } catch {}
   return 'pt-BR'
@@ -68,9 +77,22 @@ export function useExtensionLocale() {
   const [locale, setLocale] = useState(getAppLocale)
 
   useEffect(() => {
-    const handleLocaleChange = () => setLocale(getAppLocale())
+    const handleLocaleChange = (e?: Event) => {
+      const custom = (e as CustomEvent)?.detail?.locale
+      if (custom && DICTIONARIES[custom]) {
+        setLocale(custom)
+      } else {
+        setLocale(getAppLocale())
+      }
+    }
+    window.addEventListener('momai:locale-changed', handleLocaleChange)
+    window.addEventListener('momai_locale_changed', handleLocaleChange)
     window.addEventListener('languagechange', handleLocaleChange)
-    return () => window.removeEventListener('languagechange', handleLocaleChange)
+    return () => {
+      window.removeEventListener('momai:locale-changed', handleLocaleChange)
+      window.removeEventListener('momai_locale_changed', handleLocaleChange)
+      window.removeEventListener('languagechange', handleLocaleChange)
+    }
   }, [])
 
   const t = useCallback((key: string, params?: Record<string, any>) => {

@@ -22,10 +22,10 @@ export const ChatNewsCard: React.FC<{ data?: { articles?: NewsArticle[]; query?:
     <div className={`p-3.5 rounded-xl border border-border bg-card max-w-lg shadow-sm flex flex-col gap-3 text-xs`}>
       <div className="flex items-center justify-between border-b border-border/60 pb-2">
         <span className="font-bold text-text flex items-center gap-1.5">
-          <span>📰</span> {query ? `Notícias sobre "${query}"` : t('app.title')}
+          <span>📰</span> {query ? t('chat.newsAbout', { query }) : t('app.title')}
         </span>
         <span className="text-[11px] text-text-muted">
-          {articles.length} notícias
+          {t('app.totalArticles', { count: articles.length })}
         </span>
       </div>
 

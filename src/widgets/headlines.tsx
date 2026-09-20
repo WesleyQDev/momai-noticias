@@ -97,10 +97,12 @@ export default function NoticiasHeadlinesWidget({ instanceId, widgetId }: Widget
   )
 }
 
+import { translate } from '../services/i18n'
+
 NoticiasHeadlinesWidget.contextMenu = [
   {
     id: 'view_news',
-    label: 'Ver notícia',
+    label: translate('widget.headlines.viewNews'),
     action: 'view_news'
   }
 ]

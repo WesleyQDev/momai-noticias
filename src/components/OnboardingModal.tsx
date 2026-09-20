@@ -347,7 +347,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                             <span>{langInfo?.label || langCode}</span>
                           </span>
                           <span className="text-text-muted text-[11px] font-normal">
-                            {followedCount} de {langSources.length} selecionadas
+                            {t('onboarding.sourcesSelected', { count: followedCount, total: langSources.length })}
                           </span>
                         </div>
 
@@ -417,7 +417,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 <div className="flex flex-wrap gap-2 pt-2">
                   {mutedKeywords.length === 0 ? (
                     <p className="text-text-muted italic text-xs">
-                      Nenhum termo silenciado ainda. Você pode configurar isso a qualquer momento.
+                      {t('onboarding.emptyMuted')}
                     </p>
                   ) : (
                     mutedKeywords.map((kw) => (

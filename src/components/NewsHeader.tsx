@@ -62,7 +62,7 @@ export const NewsHeader: React.FC<NewsHeaderProps> = ({
             title={t('app.title')}
           >
             <span className="text-lg font-extrabold tracking-tight text-text">MomAI</span>
-            <span className="text-lg font-extrabold tracking-tight text-accent">Notícias</span>
+            <span className="text-lg font-extrabold tracking-tight text-accent">{t('app.title')}</span>
           </button>
 
           <div className="hidden sm:block flex-1 max-w-md mx-auto">{searchField}</div>

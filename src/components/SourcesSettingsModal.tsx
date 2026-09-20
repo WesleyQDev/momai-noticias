@@ -144,7 +144,7 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
           <button
             onClick={onClose}
             className={`${THEME_CLASSES.buttonGhost} p-2`}
-            title="Fechar"
+            title={t('app.back')}
           >
             ✕
           </button>
@@ -197,7 +197,7 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
                 type="text"
                 value={sourceSearch}
                 onChange={(e) => setSourceSearch(e.target.value)}
-                placeholder="Filtrar fontes por nome..."
+                placeholder={t('settings.filterSources')}
                 className={`w-full sm:w-72 ${THEME_CLASSES.input}`}
               />
             </div>
@@ -223,7 +223,7 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
                         <span>{langInfo.label}</span>
                       </span>
                       <span className="text-text-muted text-[11px] font-normal">
-                        {followedCount} de {langSources.length} seguidas
+                        {t('settings.sourcesFollowed', { count: followedCount, total: langSources.length })}
                       </span>
                     </div>
 
@@ -353,7 +353,7 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
             <div className="flex flex-wrap gap-2 pt-2">
               {mutedKeywords.length === 0 ? (
                 <p className="text-text-muted italic text-xs">
-                  Nenhum termo silenciado.
+                  {t('settings.emptyMuted')}
                 </p>
               ) : (
                 mutedKeywords.map((kw) => (
@@ -379,7 +379,7 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
       {/* Footer */}
       <footer className="p-4 border-t border-border flex items-center justify-end gap-3 bg-card shrink-0">
         <button onClick={onClose} className={THEME_CLASSES.buttonSecondary}>
-          Cancelar
+          {t('settings.cancel')}
         </button>
         <button onClick={handleSaveAll} className={THEME_CLASSES.buttonPrimary}>
           {t('settings.saveChanges')}

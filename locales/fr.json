@@ -56,6 +56,8 @@
     "geral": "Général"
   },
   "onboarding": {
+    "sourcesSelected": "{count} sur {total} sélectionnées",
+    "emptyMuted": "Aucun terme masqué pour le moment. Vous pouvez configurer cela à tout moment.",
     "title": "Personnalisez votre flux d'actualités",
     "subtitle": "Choisissez vos langues, thèmes et sources favorites pour commencer.",
     "step1Title": "1. Choisissez vos langues",
@@ -79,6 +81,10 @@
     "customSourceError": "Impossible de trouver un flux RSS valide à cette adresse."
   },
   "settings": {
+    "filterSources": "Filtrer les sources par nom...",
+    "sourcesFollowed": "{count} sur {total} suivies",
+    "emptyMuted": "Aucun terme masqué.",
+    "cancel": "Annuler",
     "title": "Préférences d'Actualités",
     "tabs": {
       "sources": "Sources",
@@ -101,6 +107,7 @@
     "daysAgo": "il y a {count} j"
   },
   "chat": {
+    "newsAbout": "Actualités sur « {query} »",
     "viewMore": "Voir plus d'actualités",
     "briefingTitle": "Point d'actualité",
     "openInApp": "Ouvrir dans Actualités"
@@ -112,5 +119,13 @@
       "empty": "Pas de nouvelles pour le moment.",
       "viewNews": "Voir l'actualité"
     }
+  },
+  "languages": {
+    "ptBR": "Portugais (Brésil)",
+    "enUS": "Anglais (États-Unis)",
+    "es": "Espagnol",
+    "fr": "Français",
+    "de": "Allemand",
+    "it": "Italien"
   }
 }

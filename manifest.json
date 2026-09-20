@@ -1,7 +1,7 @@
 {
   "id": "momai-noticias",
   "name": "MomAI Notícias",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "category": "news",
   "tags": ["noticias", "news", "rss", "feed", "discover", "artigos", "jornais"],
   "author": "WesleyQDev",

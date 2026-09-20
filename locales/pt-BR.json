@@ -56,6 +56,8 @@
     "geral": "Geral"
   },
   "onboarding": {
+    "sourcesSelected": "{count} de {total} selecionadas",
+    "emptyMuted": "Nenhum termo silenciado ainda. Você pode configurar isso a qualquer momento.",
     "title": "Personalize seu Feed de Notícias",
     "subtitle": "Escolha seus idiomas, temas e fontes preferidas para começar.",
     "step1Title": "1. Escolha seus idiomas",
@@ -79,6 +81,10 @@
     "customSourceError": "Não foi possível encontrar um feed RSS neste endereço."
   },
   "settings": {
+    "filterSources": "Filtrar fontes por nome...",
+    "sourcesFollowed": "{count} de {total} seguidas",
+    "emptyMuted": "Nenhum termo silenciado.",
+    "cancel": "Cancelar",
     "title": "Preferências de Notícias",
     "tabs": {
       "sources": "Fontes",
@@ -101,6 +107,7 @@
     "daysAgo": "há {count} d"
   },
   "chat": {
+    "newsAbout": "Notícias sobre \"{query}\"",
     "viewMore": "Ver mais notícias",
     "briefingTitle": "Briefing de Notícias",
     "openInApp": "Abrir no Notícias"
@@ -112,5 +119,13 @@
       "empty": "Sem notícias por enquanto.",
       "viewNews": "Ver notícia"
     }
+  },
+  "languages": {
+    "ptBR": "Português (Brasil)",
+    "enUS": "Inglês (EUA)",
+    "es": "Espanhol",
+    "fr": "Francês",
+    "de": "Alemão",
+    "it": "Italiano"
   }
 }

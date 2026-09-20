@@ -56,6 +56,8 @@
     "geral": "Allgemein"
   },
   "onboarding": {
+    "sourcesSelected": "{count} von {total} ausgewählt",
+    "emptyMuted": "Noch keine stummgeschalteten Begriffe. Sie können dies jederzeit anpassen.",
     "title": "Personalisieren Sie Ihren Newsfeed",
     "subtitle": "Wählen Sie Sprachen, Themen und bevorzugte Quellen aus.",
     "step1Title": "1. Sprachen auswählen",
@@ -79,6 +81,10 @@
     "customSourceError": "Unter dieser Adresse wurde kein gültiger RSS/Atom-Feed gefunden."
   },
   "settings": {
+    "filterSources": "Quellen nach Namen filtern...",
+    "sourcesFollowed": "{count} von {total} gefolgt",
+    "emptyMuted": "Keine stummgeschalteten Begriffe.",
+    "cancel": "Abbrechen",
     "title": "Nachrichten-Einstellungen",
     "tabs": {
       "sources": "Quellen",
@@ -101,6 +107,7 @@
     "daysAgo": "vor {count} Tg."
   },
   "chat": {
+    "newsAbout": "Nachrichten über „{query}“",
     "viewMore": "Mehr Nachrichten ansehen",
     "briefingTitle": "Nachrichten-Briefing",
     "openInApp": "In Nachrichten öffnen"
@@ -112,5 +119,13 @@
       "empty": "Keine Nachrichten im Moment.",
       "viewNews": "Nachricht ansehen"
     }
+  },
+  "languages": {
+    "ptBR": "Portugiesisch (Brasilien)",
+    "enUS": "Englisch (USA)",
+    "es": "Spanisch",
+    "fr": "Französisch",
+    "de": "Deutsch",
+    "it": "Italienisch"
   }
 }
