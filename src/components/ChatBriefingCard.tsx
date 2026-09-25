@@ -38,7 +38,32 @@ export const ChatBriefingCard: React.FC<{ data?: BriefingResponse }> = ({ data }
               <span>•</span> {section.topicLabel}
             </h4>
             <div className="space-y-1 pl-2">
-              {section.articles.map((art) => (
+              {section.articles.map((art, artIndex) => (
+                artIndex === 0 && art.image ? (
+                  <a
+                    key={art.id || art.url}
+                    href={art.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block group rounded bg-sidebar hover:bg-input transition-colors overflow-hidden"
+                  >
+                    <img
+                      src={art.image}
+                      alt=""
+                      loading="lazy"
+                      className="w-full h-28 object-cover bg-input"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="p-1.5">
+                      <div className="font-medium text-text group-hover:text-accent transition-colors line-clamp-1">
+                        {art.title}
+                      </div>
+                      <div className="text-[10px] text-text-muted mt-0.5">
+                        {art.sourceName} • {formatRelativeTime(art.publishedAt, t)}
+                      </div>
+                    </div>
+                  </a>
+                ) : (
                 <a
                   key={art.id || art.url}
                   href={art.url}
@@ -53,6 +78,7 @@ export const ChatBriefingCard: React.FC<{ data?: BriefingResponse }> = ({ data }
                     {art.sourceName} • {formatRelativeTime(art.publishedAt, t)}
                   </div>
                 </a>
+                )
               ))}
             </div>
           </div>

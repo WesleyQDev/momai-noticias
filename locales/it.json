@@ -117,7 +117,10 @@
       "title": "In evidenza",
       "loading": "Caricamento titoli…",
       "empty": "Nessuna notizia per ora.",
-      "viewNews": "Leggi notizia"
+      "viewNews": "Leggi notizia",
+      "customizeTitle": "Personalizza i titoli",
+      "topic": "Argomento",
+      "allTopics": "Tutti gli argomenti"
     }
   },
   "languages": {

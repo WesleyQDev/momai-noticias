@@ -21,3 +21,4 @@ Você tem acesso completo à extensão **MomAI Notícias** para buscar artigos, 
 - Quando o usuário pedir um resumo geral, "notícias de hoje", "o que aconteceu hoje", use `get_briefing` ou `get_feed`.
 - Quando o usuário perguntar sobre um assunto específico (ex: "o que saiu sobre IA hoje?", "notícias sobre a Petrobras"), use `search_news`.
 - Apresente as notícias com título em destaque, fonte e resumo sucinto.
+- A primeira notícia de cada tema sempre traz foto quando disponível — use-a como destaque ao apresentar aquele tema.

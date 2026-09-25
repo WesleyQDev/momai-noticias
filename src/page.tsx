@@ -220,10 +220,24 @@ export const NewsPage: React.FC<{ isActive?: boolean }> = () => {
 
   // 3. Handlers
   const handleRefresh = async () => {
+    if (activeTab === 'saved') return
     setIsRefreshing(true)
+    setError(null)
     try {
       await newsApi.refreshFeeds()
-      await loadArticles()
+      const normalizedTopic = activeTab === 'geral' ? 'paravoce' : activeTab
+      const result = await loadFirstPage(
+        {
+          topic: normalizedTopic !== 'paravoce' ? normalizedTopic : undefined,
+          refresh: true,
+          seed: String(Date.now())
+        },
+        { force: true }
+      )
+      if (!result.ok) {
+        setError(result.error || t('app.errorLoading'))
+      }
+      scrollFeedToTop(scrollContainerRef.current)
     } catch (err) {
       console.error('[momai-noticias:page] Refresh error:', err)
     } finally {

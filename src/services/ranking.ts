@@ -1,6 +1,8 @@
 // src/services/ranking.ts
 import type { NewsArticle, UserProfile } from './types'
 import { extractInterestTerms } from './interest-terms.ts'
+import { ensureFirstOfTopicHasPhoto } from './feed-mix.ts'
+import { shuffleWithSeed } from './feed-shuffle.ts'
 
 export const HALF_LIFE_HOURS = 14
 export const HALF_LIFE_MS = HALF_LIFE_HOURS * 60 * 60 * 1000
@@ -201,7 +203,8 @@ export function rankAndFilterFeed(
   seenIds: Set<string> = new Set(),
   filterTopic?: string,
   filterLang?: string,
-  onlyFollowed = false
+  onlyFollowed = false,
+  shuffleSeed?: string | number
 ): NewsArticle[] {
   // Deduplicate first
   const deduped = deduplicateArticles(articles)
@@ -235,6 +238,43 @@ export function rankAndFilterFeed(
   // Sort by score descending
   filtered.sort((a, b) => (b.score || 0) - (a.score || 0))
 
+  if (shuffleSeed !== undefined && String(shuffleSeed).length > 0) {
+    filtered = breakScoreTies(filtered, shuffleSeed)
+  }
+
   // Apply diversity
-  return applyDiversityLimit(filtered)
+  // Photo-first rule: each topic opens with an illustrated article when one exists.
+  return ensureFirstOfTopicHasPhoto(applyDiversityLimit(filtered))
+}
+
+export function breakScoreTies<T extends NewsArticle>(articles: T[], seed: string | number): T[] {
+  const grouped: T[][] = []
+  let current: T[] = []
+  let anchor = 0
+  for (const item of articles) {
+    const score = Number(item.score) || 0
+    if (current.length === 0) {
+      current.push(item)
+      anchor = score
+      continue
+    }
+    const tolerance = Math.max(0.02, Math.abs(anchor) * 0.08)
+    if (Math.abs(score - anchor) <= tolerance) {
+      current.push(item)
+    } else {
+      grouped.push(current)
+      current = [item]
+      anchor = score
+    }
+  }
+  if (current.length > 0) grouped.push(current)
+  const shuffled: T[] = []
+  grouped.forEach((group, index) => {
+    if (group.length <= 1) {
+      shuffled.push(...group)
+    } else {
+      shuffled.push(...shuffleWithSeed(group, `${String(seed)}:${index}`))
+    }
+  })
+  return shuffled
 }

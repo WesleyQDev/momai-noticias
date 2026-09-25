@@ -1,7 +1,7 @@
 {
   "id": "momai-noticias",
   "name": "MomAI Notícias",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "category": "news",
   "tags": ["noticias", "news", "rss", "feed", "discover", "artigos", "jornais"],
   "author": "WesleyQDev",
@@ -11,6 +11,7 @@
   "app_icon": "app.png",
   "icon": "icon.png",
   "sidebar_icon": "icon.png",
+  "sidebar_icon_essential": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2\"/><path d=\"M18 14h-8M15 18h-5M10 6h8v4h-8V6Z\"/></svg>",
   "sidebar": true,
   "background": true,
   "backgroundScript": "dist/runtime.js",
@@ -111,31 +112,51 @@
   },
   "tools": [
     {
-      "name": "get_feed",
-      "label": "Obter Feed de Notícias",
-      "description": "Retorna o feed personalizado ou filtrado por tópico/idioma com base nos interesses do usuário.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "topic": {
-            "type": "string",
-            "description": "Tópico específico (ex: 'tecnologia', 'economia', 'ciencia', 'politica', 'esportes', 'games', 'cultura', 'mundo')"
-          },
-          "language": {
-            "type": "string",
-            "description": "Código do idioma (ex: 'pt-BR', 'en-US', 'es')"
-          },
-          "limit": {
-            "type": "number",
-            "description": "Quantidade máxima de notícias (padrão: 40, máx: 100)"
-          },
-          "onlyFollowed": {
-            "type": "boolean",
-            "description": "Se true, filtra apenas fontes seguidas explicitamente"
-          }
+    "name": "get_feed",
+    "label": "Obter Feed de Notícias",
+    "description": "Retorna o feed personalizado ou filtrado por tópico/idioma com base nos interesses do usuário.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "topic": {
+          "type": "string",
+          "description": "Tópico específico (ex: 'tecnologia', 'economia', 'ciencia', 'politica', 'esportes', 'games', 'cultura', 'mundo')"
+        },
+        "language": {
+          "type": "string",
+          "description": "Código do idioma (ex: 'pt-BR', 'en-US', 'es')"
+        },
+        "limit": {
+          "type": "number",
+          "description": "Quantidade máxima de notícias (padrão: 40, máx: 100)"
+        },
+        "onlyFollowed": {
+          "type": "boolean",
+          "description": "Se true, filtra apenas fontes seguidas explicitamente"
+        },
+        "offset": {
+          "type": "number",
+          "description": "Deslocamento da pagina no feed"
+        },
+        "cursor": {
+          "type": "string",
+          "description": "Cursor da sessao de scroll infinito"
+        },
+        "session": {
+          "type": "boolean",
+          "description": "Se true, abre/mantem uma sessao paginada do feed"
+        },
+        "refresh": {
+          "type": "boolean",
+          "description": "Se true, ignora a sessao anterior e gera uma nova ordenacao variada"
+        },
+        "seed": {
+          "type": "string",
+          "description": "Semente opcional para variar a ordenacao mantendo a relevancia"
         }
       }
-    },
+    }
+  },
     {
       "name": "search_news",
       "label": "Pesquisar Notícias",

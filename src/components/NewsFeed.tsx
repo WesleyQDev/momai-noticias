@@ -107,6 +107,7 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({
     <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-8">
       {lead && (
         <NewsLead
+          key={lead.id || lead.url}
           article={lead}
           isSaved={savedArticleIds.has(lead.id) || savedArticleIds.has(lead.url)}
           feedback={feedback[lead.id] || null}

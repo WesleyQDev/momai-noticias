@@ -15,9 +15,9 @@ export function upgradeImageUrl(rawUrl?: string): string | undefined {
     url = url.replace(/(_v2)?_\d+x\d+(\.[a-zA-Z0-9]+)$/i, (_match, _v2, ext) => `_v2_900x506${ext}`)
   }
 
-  // 2. BBC: upgrade low-res thumbnail paths (/ws/240/, /standard/240/) to HD (/standard/976/)
+  // 2. BBC: upgrade low-res thumbnail paths (/ws/240/, /standard/240/, etc.) to HD (/standard/976/)
   if (url.includes('ichef.bbci.co.uk')) {
-    url = url.replace(/\/(ws|standard)\/\d+\/cpsprodpb\//i, '/standard/976/cpsprodpb/')
+    url = url.replace(/\/(ws|standard|news)\/\d+\//i, '/standard/976/')
   }
 
   // 3. WordPress / Tecnoblog / InfoMoney / Superinteressante uploads: strip thumbnail suffixes like -340x191.png and query params

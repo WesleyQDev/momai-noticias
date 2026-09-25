@@ -65,6 +65,7 @@ export default function StoryCard({ story, mode, thumbWidth, onClick }: Props): 
             alt=""
             loading="lazy"
             draggable={false}
+            referrerPolicy="no-referrer"
             onError={() => setBrokenImageId(story.id)}
             style={{ width: thumbWidth }}
             className="h-full object-cover shrink-0 bg-input/40"
@@ -88,6 +89,7 @@ export default function StoryCard({ story, mode, thumbWidth, onClick }: Props): 
           alt=""
           loading="lazy"
           draggable={false}
+          referrerPolicy="no-referrer"
           onError={() => setBrokenImageId(story.id)}
           className="w-full flex-1 min-h-0 object-cover bg-input/40"
         />

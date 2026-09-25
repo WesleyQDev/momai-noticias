@@ -11,6 +11,8 @@ export interface FeedParams {
   topic?: string
   language?: string
   onlyFollowed?: boolean
+  seed?: string
+  refresh?: boolean
 }
 
 export interface PageResult {
@@ -34,7 +36,7 @@ export function useFeedPagination() {
   const pageRef = useRef(1)
   const syncAttemptsRef = useRef(0)
   const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const goToPageRef = useRef<(page: number, options?: { silent?: boolean }) => Promise<PageResult>>(
+  const goToPageRef = useRef<(page: number, options?: { silent?: boolean; refresh?: boolean; seed?: string }) => Promise<PageResult>>(
     async () => ({ ok: true })
   )
 
@@ -75,12 +77,13 @@ export function useFeedPagination() {
   useEffect(() => clearSyncTimer, [clearSyncTimer])
 
   const goToPage = useCallback(
-    async (targetPage: number, options: { silent?: boolean } = {}): Promise<PageResult> => {
+    async (targetPage: number, options: { silent?: boolean; refresh?: boolean; seed?: string } = {}): Promise<PageResult> => {
       const pageNumber = Math.max(1, Math.floor(Number(targetPage)) || 1)
       const topicKey = paramsRef.current.topic || 'paravoce'
       const pageKey = `${topicKey}:${pageNumber}`
+      const isRefresh = Boolean(options.refresh || paramsRef.current.refresh)
 
-      const cachedPage = options.silent ? undefined : pageCacheRef.current.get(pageKey)
+      const cachedPage = options.silent || isRefresh ? undefined : pageCacheRef.current.get(pageKey)
       if (cachedPage && cachedPage.length > 0) {
         pageRef.current = pageNumber
         setPage(pageNumber)
@@ -93,12 +96,15 @@ export function useFeedPagination() {
       const seq = requestSeqRef.current
 
       try {
+        const refreshSeed = options.seed || paramsRef.current.seed || (isRefresh ? String(Date.now()) : undefined)
         const res = await newsApi.getFeed({
           ...paramsRef.current,
           limit: FEED_PAGE_SIZE,
           session: true,
-          cursor: cursorRef.current || undefined,
-          offset: (pageNumber - 1) * FEED_PAGE_SIZE
+          cursor: isRefresh ? undefined : cursorRef.current || undefined,
+          offset: isRefresh ? 0 : (pageNumber - 1) * FEED_PAGE_SIZE,
+          refresh: isRefresh || undefined,
+          seed: refreshSeed
         })
         if (seq !== requestSeqRef.current) return { ok: true }
         if (!res.ok || !Array.isArray(res.articles)) {
@@ -144,7 +150,7 @@ export function useFeedPagination() {
   }, [goToPage])
 
   const loadFirstPage = useCallback(
-    async (params: FeedParams = {}): Promise<PageResult> => {
+    async (params: FeedParams = {}, options: { force?: boolean } = {}): Promise<PageResult> => {
       paramsRef.current = params
       requestSeqRef.current += 1
       clearSyncTimer()
@@ -152,6 +158,15 @@ export function useFeedPagination() {
       setSyncing(false)
 
       const topicKey = params.topic || 'paravoce'
+      if (options.force || params.refresh) {
+        topicCacheRef.current.delete(topicKey)
+        for (const key of [...pageCacheRef.current.keys()]) {
+          if (key === topicKey || key.startsWith(`${topicKey}:`)) pageCacheRef.current.delete(key)
+        }
+        cursorRef.current = ''
+        setTotal(0)
+        return goToPage(1, { refresh: true, seed: params.seed || String(Date.now()) })
+      }
       const cachedTopic = topicCacheRef.current.get(topicKey)
       if (cachedTopic && cachedTopic.articles.length > 0) {
         cursorRef.current = cachedTopic.cursor

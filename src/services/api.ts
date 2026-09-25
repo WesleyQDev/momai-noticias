@@ -36,6 +36,8 @@ export const newsApi = {
     session?: boolean
     cursor?: string
     offset?: number
+    refresh?: boolean
+    seed?: string
   } = {}) => executeCommand<FeedResponse>('get_feed', params),
 
   searchNews: (query: string, limit = 30) =>

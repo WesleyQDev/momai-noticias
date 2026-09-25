@@ -1,6 +1,6 @@
 // src/components/NewsLead.tsx
 // Manchete principal: imagem grande à esquerda, texto editorial à direita.
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import type { ArticleFeedback, NewsArticle } from '../services/types'
 import { useExtensionLocale, formatRelativeTime } from '../services/i18n'
 
@@ -25,6 +25,10 @@ export const NewsLead: React.FC<NewsLeadProps> = ({
   const [copied, setCopied] = useState(false)
   const [imageError, setImageError] = useState(false)
 
+  useEffect(() => {
+    setImageError(false)
+  }, [article.id, article.image])
+
   const handleCopy = (event: React.MouseEvent) => {
     event.stopPropagation()
     if (!article.url) return
@@ -44,13 +48,14 @@ export const NewsLead: React.FC<NewsLeadProps> = ({
   }
 
   const topic = article.canonicalTopics?.[0] || 'geral'
+  const hasImage = Boolean(article.image) && !imageError
 
   return (
     <article
       onClick={() => onArticleClick(article)}
-      className="group cursor-pointer grid grid-cols-1 sm:grid-cols-2 gap-5 pt-6 pb-8 border-b border-border"
+      className={`group cursor-pointer ${hasImage ? 'grid grid-cols-1 sm:grid-cols-2 gap-5' : 'block'} pt-6 pb-8 border-b border-border`}
     >
-      {article.image && !imageError && (
+      {hasImage && (
         <div className="w-full h-52 overflow-hidden rounded-lg bg-sidebar">
           <img
             src={article.image}
@@ -58,6 +63,7 @@ export const NewsLead: React.FC<NewsLeadProps> = ({
             onError={() => setImageError(true)}
             className="w-full h-full object-cover"
             loading="eager"
+            referrerPolicy="no-referrer"
           />
         </div>
       )}

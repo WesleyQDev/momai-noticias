@@ -24,7 +24,8 @@ export default function MomAINoticiasPanel() {
 
   useEffect(() => {
     let isMounted = true
-    newsApi.getFeed({ limit: 5 }).then((res) => {
+    const day = new Date().toISOString().slice(0, 10)
+    newsApi.getFeed({ limit: 5, seed: `panel:${day}` }).then((res) => {
       if (isMounted && res.ok && Array.isArray(res.articles)) {
         setTopHeadlines(res.articles)
       }

@@ -5,6 +5,7 @@
 // ε-exploração usado em bandits de recomendação de notícias.
 import type { NewsArticle, UserProfile } from './types'
 import { extractInterestTerms } from './interest-terms.ts'
+import { shuffleWithSeed } from './feed-shuffle.ts'
 
 export type FeedPool = 'personal' | 'variety' | 'explore'
 
@@ -23,6 +24,7 @@ export const DEFAULT_FEED_SHARES: FeedShares = {
 export interface FeedMixOptions {
   pageSize?: number
   shares?: FeedShares
+  seed?: string | number
 }
 
 export interface FeedMixResult {
@@ -129,7 +131,43 @@ export function buildFeedMix(
     pools[classifyFeedPool(article, profile)].push(article)
   }
 
+  if (options.seed !== undefined && String(options.seed).length > 0) {
+    const base = String(options.seed)
+    pools.personal = shuffleWithSeed(pools.personal, `${base}:personal`)
+    pools.variety = shuffleWithSeed(pools.variety, `${base}:variety`)
+    pools.explore = shuffleWithSeed(pools.explore, `${base}:explore`)
+  }
+
   return interleavePools(pools, shares, pageSize)
+}
+
+// First news of every topic must carry a photo: when a topic first appears
+// without one, the nearest later article of the same topic that has a photo
+// takes that slot. Topics with no photo at all keep their order.
+export function ensureFirstOfTopicHasPhoto(articles: NewsArticle[]): NewsArticle[] {
+  const result = [...articles]
+  const seen = new Set<string>()
+
+  for (let index = 0; index < result.length; index += 1) {
+    const topic = result[index].canonicalTopics?.[0] || 'geral'
+    if (seen.has(topic)) continue
+    seen.add(topic)
+    if (result[index].image) continue
+
+    const photoIndex = result.findIndex(
+      (candidate, candidateIndex) =>
+        candidateIndex > index &&
+        ((candidate.canonicalTopics?.[0] || 'geral') === topic ||
+          Boolean(candidate.canonicalTopics && candidate.canonicalTopics.includes(topic as any))) &&
+        Boolean(candidate.image)
+    )
+    if (photoIndex === -1) continue
+
+    const [photo] = result.splice(photoIndex, 1)
+    result.splice(index, 0, photo)
+  }
+
+  return result
 }
 
 // Avoids two articles about the same primary topic back to back (MMR-lite):

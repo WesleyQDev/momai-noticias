@@ -1,6 +1,8 @@
 import { useEffect, type JSX } from 'react'
 import { useExtensionLocale } from '../services/i18n'
 import type { WidgetProps } from './types'
+import { NEWS_SECTIONS } from '../services/sections'
+import { isHeadlinesConfigCustomized, type HeadlinesConfig } from './headlinesCustomization'
 import { useHeadlineStory } from './hooks/useHeadlineStory'
 import { useWidgetLayout } from './hooks/useWidgetLayout'
 import { WidgetLoading, WidgetState } from './components/WidgetState'
@@ -36,9 +38,14 @@ export function openStoryInApp(story: HeadlineRow): void {
   )
 }
 
-export default function NoticiasHeadlinesWidget({ instanceId, widgetId }: WidgetProps): JSX.Element {
+export default function NoticiasHeadlinesWidget({
+  instanceId,
+  widgetId,
+  config
+}: WidgetProps<HeadlinesConfig>): JSX.Element {
   const { t } = useExtensionLocale()
-  const { loading, error, story } = useHeadlineStory(instanceId, widgetId)
+  const topic = typeof config?.topic === 'string' ? config.topic : ''
+  const { loading, error, story } = useHeadlineStory(instanceId, widgetId, topic)
   const { ref, mode, thumbWidth } = useWidgetLayout()
 
   useEffect(() => {
@@ -106,6 +113,26 @@ NoticiasHeadlinesWidget.contextMenu = [
     action: 'view_news'
   }
 ]
+
+NoticiasHeadlinesWidget.customization = {
+  isCustomized: (config?: Record<string, unknown>) => isHeadlinesConfigCustomized(config),
+  title: translate('widget.headlines.customizeTitle'),
+  defaults: {},
+  options: [
+    {
+      key: 'topic',
+      kind: 'select',
+      label: translate('widget.headlines.topic'),
+      options: [
+        { value: '', label: translate('widget.headlines.allTopics') },
+        ...NEWS_SECTIONS.filter((section) => section.id !== 'paravoce').map((section) => ({
+          value: section.id,
+          label: translate(section.labelKey)
+        }))
+      ]
+    }
+  ]
+}
 
 // Keep the host contract explicit: widgets receive these props.
 export type { WidgetProps }

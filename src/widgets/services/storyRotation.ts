@@ -1,4 +1,5 @@
 import type { HeadlineRow } from './headlineItems'
+import { shuffleWithSeed } from '../../services/feed-shuffle'
 
 export interface StoryPick {
   story: HeadlineRow | null
@@ -10,12 +11,18 @@ export interface StoryPick {
  * each group: the widget is meant to always show an illustrated story, and
  * only falls back to a plain one when nothing has an image.
  */
-export function orderStoriesByPhoto(rows: HeadlineRow[]): HeadlineRow[] {
+export function orderStoriesByPhoto(rows: HeadlineRow[], seed?: string | number): HeadlineRow[] {
   const withPhoto: HeadlineRow[] = []
   const withoutPhoto: HeadlineRow[] = []
   for (const row of rows) {
     if (row.image) withPhoto.push(row)
     else withoutPhoto.push(row)
+  }
+  if (seed !== undefined && String(seed).length > 0) {
+    return [
+      ...shuffleWithSeed(withPhoto, `${String(seed)}:photo`),
+      ...shuffleWithSeed(withoutPhoto, `${String(seed)}:plain`)
+    ]
   }
   return [...withPhoto, ...withoutPhoto]
 }

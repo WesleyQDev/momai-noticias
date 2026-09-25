@@ -117,7 +117,10 @@
       "title": "Recomendadas",
       "loading": "Carregando manchetes…",
       "empty": "Sem notícias por enquanto.",
-      "viewNews": "Ver notícia"
+      "viewNews": "Ver notícia",
+      "customizeTitle": "Personalizar manchetes",
+      "topic": "Tema",
+      "allTopics": "Todos os temas"
     }
   },
   "languages": {

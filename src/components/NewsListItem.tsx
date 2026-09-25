@@ -1,7 +1,7 @@
 // src/components/NewsListItem.tsx
 // Linha de matéria no estilo editorial: miniatura à direita, texto com respiro
 // e ações discretas que aparecem ao passar o mouse.
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import type { ArticleFeedback, NewsArticle } from '../services/types'
 import { useExtensionLocale, formatRelativeTime } from '../services/i18n'
 
@@ -25,6 +25,10 @@ export const NewsListItem: React.FC<NewsListItemProps> = ({
   const { t, locale } = useExtensionLocale()
   const [copied, setCopied] = useState(false)
   const [imageError, setImageError] = useState(false)
+
+  useEffect(() => {
+    setImageError(false)
+  }, [article.id, article.image])
 
   const handleCopy = (event: React.MouseEvent) => {
     event.stopPropagation()
@@ -124,6 +128,7 @@ export const NewsListItem: React.FC<NewsListItemProps> = ({
             onError={() => setImageError(true)}
             className="w-full h-full object-cover"
             loading="lazy"
+            referrerPolicy="no-referrer"
           />
         </div>
       )}

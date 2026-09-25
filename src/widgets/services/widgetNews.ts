@@ -6,8 +6,8 @@ import { mapHeadlineItems, type HeadlineRow } from './headlineItems'
  * widget keeps the batch as a queue so every turn shows a different story
  * without another network round trip.
  */
-export async function fetchHeadlineStories(limit = 20): Promise<HeadlineRow[]> {
-  const res = await newsApi.getFeed({ limit })
+export async function fetchHeadlineStories(limit = 20, topic?: string, seed?: string): Promise<HeadlineRow[]> {
+  const res = await newsApi.getFeed({ limit, ...(topic ? { topic } : {}), ...(seed ? { seed } : {}) })
   const articles: unknown[] = Array.isArray((res as any)?.articles)
     ? (res as any).articles
     : []

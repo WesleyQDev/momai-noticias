@@ -20,8 +20,13 @@ interface HeadlineStoryState {
  * photo are preferred; the batch is refreshed in the background so the queue
  * does not go stale in long sessions.
  */
-export function useHeadlineStory(instanceId?: string, widgetId?: string): HeadlineStoryState {
+export function useHeadlineStory(
+  instanceId?: string,
+  widgetId?: string,
+  topic?: string
+): HeadlineStoryState {
   const key = instanceId || widgetId || 'headlines'
+  const activeTopic = topic || ''
   const [story, setStory] = useState<HeadlineRow | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -29,12 +34,17 @@ export function useHeadlineStory(instanceId?: string, widgetId?: string): Headli
   const queueRef = useRef<HeadlineRow[]>([])
   const storyIdRef = useRef<string | null>(null)
   const requestRef = useRef(0)
+  const topicRef = useRef(activeTopic)
+  const seedRef = useRef(`${key}:${activeTopic}:${new Date().toISOString().slice(0, 10)}`)
 
   const fillQueue = useCallback(async () => {
-    const rows = orderStoriesByPhoto(await fetchHeadlineStories(BATCH_SIZE))
+    const rows = orderStoriesByPhoto(
+      await fetchHeadlineStories(BATCH_SIZE, activeTopic || undefined, seedRef.current),
+      seedRef.current
+    )
     queueRef.current = rows
     return rows
-  }, [])
+  }, [activeTopic, key])
 
   const advance = useCallback(async () => {
     const requestId = requestRef.current + 1
@@ -62,6 +72,20 @@ export function useHeadlineStory(instanceId?: string, widgetId?: string): Headli
   useEffect(() => {
     void advance()
   }, [advance])
+
+  // A topic change from the customize flow restarts the queue so the widget
+  // immediately reflects the new filter instead of draining old stories.
+  useEffect(() => {
+    if (topicRef.current === activeTopic) return
+    topicRef.current = activeTopic
+    seedRef.current = `${key}:${activeTopic}:${new Date().toISOString().slice(0, 10)}`
+    queueRef.current = []
+    storyIdRef.current = null
+    setStory(null)
+    setLoading(true)
+    setError('')
+    void advance()
+  }, [activeTopic, advance, key])
 
   useEffect(() => {
     const timer = setInterval(() => {

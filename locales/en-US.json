@@ -117,7 +117,10 @@
       "title": "Top stories",
       "loading": "Loading headlines…",
       "empty": "No news for now.",
-      "viewNews": "Read news"
+      "viewNews": "Read news",
+      "customizeTitle": "Customize headlines",
+      "topic": "Topic",
+      "allTopics": "All topics"
     }
   },
   "languages": {

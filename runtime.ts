@@ -8,8 +8,9 @@ import { parseFeedXml, sanitizeUrl, extractImageFromHtml, decodeFeedBuffer, upgr
 import { extractFeedUrlsFromHtml, COMMON_FEED_PATHS } from './src/services/discovery.ts'
 import { rankAndFilterFeed, deduplicateArticles, decayAffinities } from './src/services/ranking.ts'
 import { createFeedPageStore, readFeedPage } from './src/services/feed-pages.ts'
+import { resolveFeedSeed, shouldReuseSession } from './src/services/feed-shuffle.ts'
 import { evaluateEmbedPolicy } from './src/services/embed-policy.ts'
-import { buildFeedMix, spreadSameCategory } from './src/services/feed-mix.ts'
+import { buildFeedMix, spreadSameCategory, ensureFirstOfTopicHasPhoto } from './src/services/feed-mix.ts'
 import { extractInterestTerms } from './src/services/interest-terms.ts'
 import { classifyTextToTopics } from './src/services/categories.ts'
 import type { NewsArticle, FeedSource, UserProfile, CanonicalTopic, SavedArticle } from './src/services/types.ts'
@@ -194,7 +195,10 @@ async function fetchOgImage(url: string): Promise<string | undefined> {
                     html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i) ||
                     html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i)
     if (ogMatch && ogMatch[1]) {
-      const rawImg = ogMatch[1].trim()
+      let rawImg = ogMatch[1].trim()
+      try {
+        rawImg = new URL(rawImg, url).toString()
+      } catch {}
       const imgUrl = upgradeImageUrl(rawImg) || rawImg
       ogImageCache.set(url, imgUrl)
       return imgUrl
@@ -551,10 +555,15 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
       const limit = Math.min(Math.max(Number(args?.limit) || 40, 1), 100)
       const offset = Math.max(0, Math.floor(Number(args?.offset)) || 0)
       const requestedCursor = typeof args?.cursor === 'string' ? args.cursor : ''
+      const isRefresh = Boolean(args?.refresh)
+      const feedSeed = resolveFeedSeed({ seed: args?.seed, refresh: isRefresh })
 
       // Only callers that page the feed open a scroll session; one-shot reads
       // (sidebar highlights, assistant calls) just take the top of the ranking.
-      let session = requestedCursor ? feedPageStore.get(requestedCursor) : null
+      // A refresh always starts a new ranking snapshot instead of replaying it.
+      let session = shouldReuseSession({ refresh: isRefresh, cursor: requestedCursor })
+        ? feedPageStore.get(requestedCursor)
+        : null
       let pageOffset = offset
       let rankedIds: string[] = []
       if (!session) {
@@ -564,20 +573,21 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
           seenIds,
           args?.topic,
           args?.language,
-          Boolean(args?.onlyFollowed)
+          Boolean(args?.onlyFollowed),
+          feedSeed
         )
         const isTopicFilter = args?.topic && args.topic !== 'all' && args.topic !== 'paravoce'
         if (isTopicFilter) {
-          // When filtering by a specific topic (e.g. Games, Politica, Tecnologia), do not mix with other topic pools
-          rankedIds = ranked.map((a) => a.id)
+          // When filtering by a specific topic (e.g. Games, Politica, Tecnologia), ensure first article has photo
+          rankedIds = ensureFirstOfTopicHasPhoto(ranked).map((a) => a.id)
         } else {
           // Mix personal / variety / explore so the main feed does not become a bubble
           // and keeps testing subjects the user has not reacted to yet.
-          const mixed = buildFeedMix(ranked, profile, seenIds, { pageSize: ranked.length })
+          const mixed = buildFeedMix(ranked, profile, seenIds, { pageSize: ranked.length, seed: feedSeed })
           console.log(
             `[runtime:momai-noticias] get_feed: ${ranked.length} ranked (personal=${mixed.counts.personal}, variety=${mixed.counts.variety}, explore=${mixed.counts.explore})`
           )
-          rankedIds = spreadSameCategory(mixed.articles).map((a) => a.id)
+          rankedIds = ensureFirstOfTopicHasPhoto(spreadSameCategory(mixed.articles)).map((a) => a.id)
         }
         if (args?.session === true) {
           session = feedPageStore.open(rankedIds)

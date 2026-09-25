@@ -44,6 +44,7 @@ export const ChatNewsCard: React.FC<{ data?: { articles?: NewsArticle[]; query?:
                 alt=""
                 className="w-14 h-14 rounded-md object-cover shrink-0 bg-input"
                 loading="lazy"
+                referrerPolicy="no-referrer"
               />
             )}
             <div className="flex-1 min-w-0">

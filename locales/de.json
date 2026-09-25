@@ -117,7 +117,10 @@
       "title": "Empfohlen",
       "loading": "Schlagzeilen werden geladen…",
       "empty": "Keine Nachrichten im Moment.",
-      "viewNews": "Nachricht ansehen"
+      "viewNews": "Nachricht ansehen",
+      "customizeTitle": "Schlagzeilen anpassen",
+      "topic": "Thema",
+      "allTopics": "Alle Themen"
     }
   },
   "languages": {

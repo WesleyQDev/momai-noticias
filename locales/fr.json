@@ -117,7 +117,10 @@
       "title": "À la une",
       "loading": "Chargement des titres…",
       "empty": "Pas de nouvelles pour le moment.",
-      "viewNews": "Voir l'actualité"
+      "viewNews": "Voir l'actualité",
+      "customizeTitle": "Personnaliser les titres",
+      "topic": "Sujet",
+      "allTopics": "Tous les sujets"
     }
   },
   "languages": {
