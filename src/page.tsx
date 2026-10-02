@@ -47,6 +47,7 @@ export const NewsPage: React.FC<{ isActive?: boolean }> = () => {
   const [error, setError] = useState<string | null>(null)
 
   const searchDebounceRef = useRef<any>(null)
+  const refreshInFlightRef = useRef(false)
 
   const initialLoadDone = useRef(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -220,7 +221,8 @@ export const NewsPage: React.FC<{ isActive?: boolean }> = () => {
 
   // 3. Handlers
   const handleRefresh = async () => {
-    if (activeTab === 'saved') return
+    if (activeTab === 'saved' || isRefreshing || syncing || refreshInFlightRef.current) return
+    refreshInFlightRef.current = true
     setIsRefreshing(true)
     setError(null)
     try {
@@ -242,6 +244,7 @@ export const NewsPage: React.FC<{ isActive?: boolean }> = () => {
       console.error('[momai-noticias:page] Refresh error:', err)
     } finally {
       setIsRefreshing(false)
+      refreshInFlightRef.current = false
     }
   }
 

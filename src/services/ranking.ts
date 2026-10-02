@@ -4,15 +4,17 @@ import { extractInterestTerms } from './interest-terms.ts'
 import { ensureFirstOfTopicHasPhoto } from './feed-mix.ts'
 import { shuffleWithSeed } from './feed-shuffle.ts'
 
-export const HALF_LIFE_HOURS = 14
+export const HALF_LIFE_HOURS = 10
 export const HALF_LIFE_MS = HALF_LIFE_HOURS * 60 * 60 * 1000
+export const FRESH_BOOST_WINDOW_HOURS = 4
+export const FRESH_BOOST_WINDOW_MS = FRESH_BOOST_WINDOW_HOURS * 60 * 60 * 1000
 
 // Learned signals: they saturate (tanh) so a single favourite source cannot
 // take over the feed, and they fade with time so old habits lose weight.
 export const AFFINITY_SCALE = 5
 export const AFFINITY_HALF_LIFE_DAYS = 7
-// Older articles keep competing: recency decays to a floor instead of zero.
-export const RECENCY_FLOOR = 0.1
+// Older articles decay strictly to prevent days-old stories from overtaking today's news.
+export const RECENCY_FLOOR = 0.02
 // Already-seen articles stay reachable but lose priority.
 export const SEEN_MULTIPLIER = 0.35
 
@@ -20,7 +22,15 @@ export function calculateRecencyScore(publishedAt: number, now = Date.now()): nu
   const ageMs = Math.max(0, now - publishedAt)
   // Exponential decay: e^(-lambda * t) where lambda = ln(2) / halfLife
   const decayFactor = Math.pow(0.5, ageMs / HALF_LIFE_MS)
-  return Math.max(0.01, decayFactor)
+
+  // Fresh news boost for breaking stories published within the last few hours
+  let freshBoost = 1.0
+  if (ageMs < FRESH_BOOST_WINDOW_MS) {
+    const freshRatio = 1 - (ageMs / FRESH_BOOST_WINDOW_MS)
+    freshBoost = 1.0 + 0.35 * freshRatio
+  }
+
+  return Math.max(RECENCY_FLOOR, decayFactor * freshBoost)
 }
 
 export function normalizeAffinity(value: number | undefined, scale = AFFINITY_SCALE): number {

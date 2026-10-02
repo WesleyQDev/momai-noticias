@@ -5,7 +5,7 @@
 // ε-exploração usado em bandits de recomendação de notícias.
 import type { NewsArticle, UserProfile } from './types'
 import { extractInterestTerms } from './interest-terms.ts'
-import { shuffleWithSeed } from './feed-shuffle.ts'
+import { breakScoreTies } from './ranking.ts'
 
 export type FeedPool = 'personal' | 'variety' | 'explore'
 
@@ -133,9 +133,9 @@ export function buildFeedMix(
 
   if (options.seed !== undefined && String(options.seed).length > 0) {
     const base = String(options.seed)
-    pools.personal = shuffleWithSeed(pools.personal, `${base}:personal`)
-    pools.variety = shuffleWithSeed(pools.variety, `${base}:variety`)
-    pools.explore = shuffleWithSeed(pools.explore, `${base}:explore`)
+    pools.personal = breakScoreTies(pools.personal, `${base}:personal`)
+    pools.variety = breakScoreTies(pools.variety, `${base}:variety`)
+    pools.explore = breakScoreTies(pools.explore, `${base}:explore`)
   }
 
   return interleavePools(pools, shares, pageSize)
@@ -144,7 +144,7 @@ export function buildFeedMix(
 // First news of every topic must carry a photo: when a topic first appears
 // without one, the nearest later article of the same topic that has a photo
 // takes that slot. Topics with no photo at all keep their order.
-export function ensureFirstOfTopicHasPhoto(articles: NewsArticle[]): NewsArticle[] {
+export function ensureFirstOfTopicHasPhoto(articles: NewsArticle[], maxLookahead = 8): NewsArticle[] {
   const result = [...articles]
   const seen = new Set<string>()
 
@@ -157,6 +157,7 @@ export function ensureFirstOfTopicHasPhoto(articles: NewsArticle[]): NewsArticle
     const photoIndex = result.findIndex(
       (candidate, candidateIndex) =>
         candidateIndex > index &&
+        candidateIndex <= index + maxLookahead &&
         ((candidate.canonicalTopics?.[0] || 'geral') === topic ||
           Boolean(candidate.canonicalTopics && candidate.canonicalTopics.includes(topic as any))) &&
         Boolean(candidate.image)
@@ -172,7 +173,7 @@ export function ensureFirstOfTopicHasPhoto(articles: NewsArticle[]): NewsArticle
 
 // Avoids two articles about the same primary topic back to back (MMR-lite):
 // looks ahead for a different topic and swaps it into place.
-export function spreadSameCategory(articles: NewsArticle[]): NewsArticle[] {
+export function spreadSameCategory(articles: NewsArticle[], maxLookahead = 6): NewsArticle[] {
   const result = [...articles]
 
   for (let index = 1; index < result.length; index += 1) {
@@ -181,7 +182,10 @@ export function spreadSameCategory(articles: NewsArticle[]): NewsArticle[] {
     if (result[index].canonicalTopics?.[0] !== previousTopic) continue
 
     const swapIndex = result.findIndex(
-      (candidate, candidateIndex) => candidateIndex > index && candidate.canonicalTopics?.[0] !== previousTopic
+      (candidate, candidateIndex) =>
+        candidateIndex > index &&
+        candidateIndex <= index + maxLookahead &&
+        candidate.canonicalTopics?.[0] !== previousTopic
     )
     if (swapIndex === -1) continue
 

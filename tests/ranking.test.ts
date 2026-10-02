@@ -38,16 +38,55 @@ function makeProfile(overrides: Partial<UserProfile>): UserProfile {
 }
 
 describe('Ranking and Scoring Engine', () => {
-  it('should apply exponential decay to older articles', () => {
+  it('should apply exponential decay to older articles and boost fresh articles within last hours', () => {
     const now = 1700000000000
     const freshTime = now - 1 * 60 * 60 * 1000 // 1 hour ago
-    const oldTime = now - 28 * 60 * 60 * 1000 // 2 half-lives (28 hours) ago
+    const midTime = now - 10 * 60 * 60 * 1000 // 1 half-life (10 hours) ago
+    const twoDaysOld = now - 48 * 60 * 60 * 1000 // 48 hours ago
 
     const freshScore = calculateRecencyScore(freshTime, now)
-    const oldScore = calculateRecencyScore(oldTime, now)
+    const midScore = calculateRecencyScore(midTime, now)
+    const twoDaysScore = calculateRecencyScore(twoDaysOld, now)
 
-    expect(freshScore).toBeGreaterThan(0.9)
-    expect(oldScore).toBeCloseTo(0.25, 1)
+    expect(freshScore).toBeGreaterThan(1.1) // boosted
+    expect(midScore).toBeCloseTo(0.5, 1)
+    expect(twoDaysScore).toBeLessThan(0.05)
+  })
+
+  it('should prioritize fresh articles from last hours over 2-day-old articles even with high affinity', () => {
+    const now = Date.now()
+    const profile = makeProfile({
+      interests: ['tecnologia'],
+      followedSources: ['tecnoblog'],
+      affinityBySource: { tecnoblog: 5 },
+      affinityByTopic: { tecnologia: 5 }
+    })
+
+    const twoDaysAgo = now - 48 * 60 * 60 * 1000
+    const twoHoursAgo = now - 2 * 60 * 60 * 1000
+
+    // Old article from favourite source and topic
+    const oldFavArticle = makeArticle({
+      id: 'old-fav',
+      title: 'Noticia antiga de tecnologia',
+      sourceId: 'tecnoblog',
+      canonicalTopics: ['tecnologia'],
+      publishedAt: twoDaysAgo
+    })
+
+    // Fresh article from general neutral source
+    const freshNeutralArticle = makeArticle({
+      id: 'fresh-neutral',
+      title: 'Noticia recente geral',
+      sourceId: 'outra-fonte',
+      canonicalTopics: ['geral'],
+      publishedAt: twoHoursAgo
+    })
+
+    const oldScore = calculateArticleScore(oldFavArticle, profile, new Set(), now)
+    const freshScore = calculateArticleScore(freshNeutralArticle, profile, new Set(), now)
+
+    expect(freshScore).toBeGreaterThan(oldScore)
   })
 
   it('should score interested and followed articles higher', () => {

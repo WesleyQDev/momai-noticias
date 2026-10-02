@@ -89,6 +89,7 @@ export function useHeadlineStory(
 
   useEffect(() => {
     const timer = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return
       void fillQueue().catch(() => {
         // Background refresh only: the story on screen stays untouched.
       })

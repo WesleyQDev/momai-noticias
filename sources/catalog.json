@@ -36,6 +36,51 @@
     "region": "BR"
   },
   {
+    "id": "veja-saude",
+    "title": "Veja Saúde",
+    "homepage": "https://saude.abril.com.br",
+    "feed": "https://saude.abril.com.br/feed/",
+    "language": "pt-BR",
+    "topics": ["saude", "ciencia"],
+    "region": "BR"
+  },
+  {
+    "id": "folha-saude",
+    "title": "Folha de S.Paulo — Equilíbrio e Saúde",
+    "homepage": "https://www1.folha.uol.com.br/equilibrioesaude/",
+    "feed": "https://feeds.folha.uol.com.br/equilibrioesaude/rss091.xml",
+    "language": "pt-BR",
+    "topics": ["saude", "ciencia"],
+    "region": "BR"
+  },
+  {
+    "id": "metropoles-saude",
+    "title": "Metrópoles — Saúde",
+    "homepage": "https://www.metropoles.com/saude",
+    "feed": "https://www.metropoles.com/saude/feed",
+    "language": "pt-BR",
+    "topics": ["saude"],
+    "region": "BR"
+  },
+  {
+    "id": "drauzio-saude",
+    "title": "Portal Drauzio Varella",
+    "homepage": "https://drauziovarella.uol.com.br",
+    "feed": "https://drauziovarella.uol.com.br/feed/",
+    "language": "pt-BR",
+    "topics": ["saude", "ciencia"],
+    "region": "BR"
+  },
+  {
+    "id": "agencia-brasil-saude",
+    "title": "Agência Brasil — Saúde",
+    "homepage": "https://agenciabrasil.ebc.com.br/saude",
+    "feed": "https://agenciabrasil.ebc.com.br/rss/saude/feed.xml",
+    "language": "pt-BR",
+    "topics": ["saude"],
+    "region": "BR"
+  },
+  {
     "id": "tecnoblog",
     "title": "Tecnoblog",
     "homepage": "https://tecnoblog.net",
@@ -104,7 +149,7 @@
     "homepage": "https://www.bbc.com/portuguese",
     "feed": "https://feeds.bbci.co.uk/portuguese/rss.xml",
     "language": "pt-BR",
-    "topics": ["mundo", "geral", "ciencia", "saude", "politica"],
+    "topics": ["mundo", "geral", "politica"],
     "region": "BR"
   },
   {
@@ -302,7 +347,7 @@
     "homepage": "https://www.bbc.com/mundo",
     "feed": "https://feeds.bbci.co.uk/mundo/rss.xml",
     "language": "es",
-    "topics": ["mundo", "geral", "ciencia", "saude"],
+    "topics": ["mundo", "geral", "politica"],
     "region": "ES"
   },
   {

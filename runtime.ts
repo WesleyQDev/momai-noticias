@@ -6,6 +6,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { parseFeedXml, sanitizeUrl, extractImageFromHtml, decodeFeedBuffer, upgradeImageUrl } from './src/services/feed-parser.ts'
 import { extractFeedUrlsFromHtml, COMMON_FEED_PATHS } from './src/services/discovery.ts'
+import { resolveCatalogPath } from './src/services/catalog-path.ts'
 import { rankAndFilterFeed, deduplicateArticles, decayAffinities } from './src/services/ranking.ts'
 import { createFeedPageStore, readFeedPage } from './src/services/feed-pages.ts'
 import { resolveFeedSeed, shouldReuseSession } from './src/services/feed-shuffle.ts'
@@ -46,16 +47,9 @@ const storageBridge = createIpcNewsStorage({
 let curatedSources: FeedSource[] = []
 try {
   const currentDir = typeof __dirname !== 'undefined' ? __dirname : process.cwd()
-  const candidates = [
-    path.join(currentDir, 'sources', 'catalog.json'),
-    path.join(currentDir, '..', 'sources', 'catalog.json'),
-    path.join(process.cwd(), 'sources', 'catalog.json')
-  ]
-  for (const c of candidates) {
-    if (fs.existsSync(c)) {
-      curatedSources = JSON.parse(fs.readFileSync(c, 'utf8'))
-      break
-    }
+  const catalogPath = resolveCatalogPath(process.argv[3], currentDir, process.cwd())
+  if (catalogPath) {
+    curatedSources = JSON.parse(fs.readFileSync(catalogPath, 'utf8'))
   }
 } catch (e: any) {
   console.error('[runtime:momai-noticias] Failed to load catalog.json:', e?.message || e)
@@ -299,7 +293,9 @@ async function performSyncActiveFeeds(force: boolean): Promise<void> {
         return Date.now() - cached.lastFetchedAt > 15 * 60 * 1000 // 15 mins
       })
 
-  console.log(`[runtime:momai-noticias] syncActiveFeeds: ${allSources.length} total, ${relevantSources.length} relevant, ${sourcesToFetch.length} to fetch (force=${force})`)
+  if (sourcesToFetch.length > 0) {
+    console.debug(`[runtime:momai-noticias] syncActiveFeeds: ${allSources.length} total, ${relevantSources.length} relevant, ${sourcesToFetch.length} to fetch (force=${force})`)
+  }
 
   // Prioritize primary portals and followed sources first so headline and top feed are ready rapidly
   const sortedSources = [...sourcesToFetch].sort((a, b) => {
@@ -323,7 +319,9 @@ async function performSyncActiveFeeds(force: boolean): Promise<void> {
     })
   }
 
-  console.log(`[runtime:momai-noticias] syncActiveFeeds done. Total in memory: ${inMemoryArticles.size}`)
+  if (sourcesToFetch.length > 0) {
+    console.debug(`[runtime:momai-noticias] syncActiveFeeds done. Total in memory: ${inMemoryArticles.size}`)
+  }
 }
 
 let syncInFlight: Promise<void> | null = null
@@ -362,15 +360,22 @@ async function pruneOldArticles(retentionDays = 3): Promise<void> {
     }
   }
 
-  // Prune feed_cache collection
+  // Prune feed_cache collection in batches
   try {
-    const list = await storageBridge.collections.list('feed_cache')
-    if (Array.isArray(list)) {
+    let hasMore = true
+    let attempts = 0
+    while (hasMore && attempts < 20) {
+      attempts++
+      const list = await storageBridge.collections.list<NewsArticle>('feed_cache', { limit: 500 })
+      if (!Array.isArray(list) || list.length === 0) break
+      let removedCount = 0
       for (const a of list) {
         if (a && a.publishedAt && a.publishedAt < cutoff) {
           await storageBridge.collections.remove('feed_cache', { id: a.id })
+          removedCount++
         }
       }
+      if (removedCount === 0 || list.length < 500) break
     }
   } catch {}
 }
@@ -381,27 +386,30 @@ async function getAllArticles(): Promise<NewsArticle[]> {
     return Array.from(inMemoryArticles.values())
   }
   try {
-    // The host caps a single list read at 500 rows, so walk the cached pages.
+    const profile = await getUserProfile()
+    const retentionDays = profile.retentionDays || 3
+    const cutoff = Date.now() - (retentionDays * 24 * 60 * 60 * 1000)
+
     const cached: NewsArticle[] = []
-    for (const offset of [0, 500]) {
+    for (let offset = 0; offset < 2000; offset += 500) {
       const page = await storageBridge.collections.list<NewsArticle>('feed_cache', {
         limit: 500,
         offset,
         orderBy: 'publishedAt'
       })
       if (!Array.isArray(page) || page.length === 0) break
-      cached.push(...page)
-      if (page.length < 500) break
-    }
-    if (cached.length > 0) {
-      for (const a of cached) {
-        if (a && a.id) {
+      for (const a of page) {
+        if (a && a.id && (!a.publishedAt || a.publishedAt >= cutoff)) {
           if (a.image) {
             a.image = upgradeImageUrl(a.image) || a.image
           }
           inMemoryArticles.set(a.id, a)
+          cached.push(a)
         }
       }
+      if (page.length < 500) break
+    }
+    if (cached.length > 0) {
       return cached
     }
   } catch (err: any) {
@@ -519,6 +527,12 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
       let articles = await getAllArticles()
       let syncing = false
 
+      const limit = Math.min(Math.max(Number(args?.limit) || 40, 1), 100)
+      const offset = Math.max(0, Math.floor(Number(args?.offset)) || 0)
+      const requestedCursor = typeof args?.cursor === 'string' ? args.cursor : ''
+      const isRefresh = Boolean(args?.refresh)
+      const feedSeed = resolveFeedSeed({ seed: args?.seed, refresh: isRefresh })
+
       if (articles.length === 0) {
         // Nothing cached yet: start syncing and wait briefly for the first batch
         // so the headline and first elements load as fast as possible without
@@ -535,7 +549,17 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
         const isSyncRunning = syncInFlight !== null
         const lastSync = profile.lastSyncAt || 0
         const isStaleFeed = Date.now() - lastSync > 2 * 60 * 1000
-        if (isSyncRunning) {
+        if (isRefresh) {
+          syncing = true
+          syncActiveFeeds(true)
+            .then(async () => {
+              profile.lastSyncAt = Date.now()
+              await saveUserProfile(profile)
+            })
+            .catch((err) => {
+              console.warn('[runtime:momai-noticias] Background refresh sync error:', err?.message || err)
+            })
+        } else if (isSyncRunning) {
           syncing = true
         } else if (isStaleFeed) {
           syncing = true
@@ -549,14 +573,6 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
             })
         }
       }
-
-      console.log(`[runtime:momai-noticias] get_feed: ${articles.length} raw articles in cache`)
-
-      const limit = Math.min(Math.max(Number(args?.limit) || 40, 1), 100)
-      const offset = Math.max(0, Math.floor(Number(args?.offset)) || 0)
-      const requestedCursor = typeof args?.cursor === 'string' ? args.cursor : ''
-      const isRefresh = Boolean(args?.refresh)
-      const feedSeed = resolveFeedSeed({ seed: args?.seed, refresh: isRefresh })
 
       // Only callers that page the feed open a scroll session; one-shot reads
       // (sidebar highlights, assistant calls) just take the top of the ranking.
@@ -584,9 +600,6 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
           // Mix personal / variety / explore so the main feed does not become a bubble
           // and keeps testing subjects the user has not reacted to yet.
           const mixed = buildFeedMix(ranked, profile, seenIds, { pageSize: ranked.length, seed: feedSeed })
-          console.log(
-            `[runtime:momai-noticias] get_feed: ${ranked.length} ranked (personal=${mixed.counts.personal}, variety=${mixed.counts.variety}, explore=${mixed.counts.explore})`
-          )
           rankedIds = ensureFirstOfTopicHasPhoto(spreadSameCategory(mixed.articles)).map((a) => a.id)
         }
         if (args?.session === true) {

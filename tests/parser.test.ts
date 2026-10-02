@@ -144,4 +144,14 @@ describe('Feed Parser', () => {
     expect(horoscopeArticles[0].canonicalTopics).toContain('geral')
     expect(horoscopeArticles[0].canonicalTopics).not.toContain('politica')
   })
+
+  it('should extract images from BBC media:thumbnail and health feed enclosures', () => {
+    const bbcXml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/"><channel><title>BBC</title><item><title>Noticia BBC</title><link>https://bbc.com/1</link><media:thumbnail width="240" height="160" url="https://ichef.bbci.co.uk/ace/ws/240/cpsprodpb/733a/live/bf218cb0.jpg"/></item></channel></rss>`
+    const bbcArticles = parseFeedXml(bbcXml, { id: 'bbc-brasil', title: 'BBC', language: 'pt-BR', topics: ['geral'] })
+    expect(bbcArticles[0].image).toBe('https://ichef.bbci.co.uk/ace/standard/976/cpsprodpb/733a/live/bf218cb0.jpg')
+
+    const saudeXml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Veja Saude</title><item><title>Novo remedio</title><link>https://saude.abril.com.br/1</link><enclosure url="https://saude.abril.com.br/foto.jpg" type="image/jpeg"/></item></channel></rss>`
+    const saudeArticles = parseFeedXml(saudeXml, { id: 'veja-saude', title: 'Veja Saude', language: 'pt-BR', topics: ['saude'] })
+    expect(saudeArticles[0].image).toBe('https://saude.abril.com.br/foto.jpg')
+  })
 })

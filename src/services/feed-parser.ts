@@ -7,13 +7,15 @@ import { classifyTextToTopics } from './categories.ts'
 export function sanitizeUrl(rawUrl: string): string {
   if (!rawUrl || typeof rawUrl !== 'string') return ''
   try {
-    const parsed = new URL(rawUrl.trim())
+    const unescaped = rawUrl.split('&amp;').join('&').trim()
+    const parsed = new URL(unescaped)
     const trackingParams = [
       'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
       'fbclid', 'gclid', 'msclkid', 'mc_cid', 'mc_eid', '_ga', '_gl', 'ref'
     ]
     for (const param of trackingParams) {
       parsed.searchParams.delete(param)
+      parsed.searchParams.delete(`amp;${param}`)
     }
     let clean = parsed.toString()
     if (clean.endsWith('?')) clean = clean.slice(0, -1)
@@ -199,13 +201,7 @@ const xmlParser = new XMLParser({
   textNodeName: '#text',
   trimValues: true,
   cdataPropName: '__cdata',
-  processEntities: {
-    enabled: true,
-    maxEntitySize: 50000,
-    maxExpansionDepth: 10,
-    maxTotalExpansions: 10000,
-    maxExpandedLength: 500000
-  }
+  processEntities: false
 })
 
 export function decodeFeedBuffer(buffer: Buffer, contentType = ''): string {
@@ -240,6 +236,8 @@ export function extractStringValue(val: any): string {
   if (typeof val === 'object') {
     if (val.__cdata !== undefined) return extractStringValue(val.__cdata)
     if (val['#text'] !== undefined) return extractStringValue(val['#text'])
+    if (val['@_url'] !== undefined) return extractStringValue(val['@_url'])
+    if (val.url !== undefined) return extractStringValue(val.url)
     if (val.name !== undefined) return extractStringValue(val.name)
     if (val.title !== undefined) return extractStringValue(val.title)
   }
@@ -281,10 +279,11 @@ export function parseFeedXml(xmlContent: string, source: Partial<FeedSource>): N
       if (!url) continue
 
       const rawSummary = extractStringValue(item.description || item['content:encoded'] || '')
+      const rawContent = extractStringValue(item['content:encoded'] || item.content || item.description || '')
       const summary = stripHtml(rawSummary).slice(0, 320)
 
       // Media / Image detection
-      const image = extractMediaImage(item['media:content'], item['media:thumbnail'], item.enclosure, rawSummary)
+      const image = extractMediaImage(item['media:content'], item['media:thumbnail'], item.enclosure, rawContent || rawSummary)
 
       // Categories
       const rawCategories = item.category ? (Array.isArray(item.category) ? item.category : [item.category]) : []
