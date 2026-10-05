@@ -145,8 +145,6 @@ async function fetchSingleFeed(source: FeedSource): Promise<NewsArticle[]> {
     const xml = decodeFeedBuffer(Buffer.from(arrayBuf), contentType)
     const parsed = parseFeedXml(xml, source)
 
-    console.log(`[runtime:momai-noticias] Fetched ${source.id}: ${parsed.length} articles (${Math.round(arrayBuf.byteLength / 1024)}KB)`)
-
     // Store in memory
     for (const article of parsed) {
       inMemoryArticles.set(article.id, article)
@@ -293,10 +291,6 @@ async function performSyncActiveFeeds(force: boolean): Promise<void> {
         return Date.now() - cached.lastFetchedAt > 15 * 60 * 1000 // 15 mins
       })
 
-  if (sourcesToFetch.length > 0) {
-    console.debug(`[runtime:momai-noticias] syncActiveFeeds: ${allSources.length} total, ${relevantSources.length} relevant, ${sourcesToFetch.length} to fetch (force=${force})`)
-  }
-
   // Prioritize primary portals and followed sources first so headline and top feed are ready rapidly
   const sortedSources = [...sourcesToFetch].sort((a, b) => {
     const aFollowed = profile.followedSources?.includes(a.id) ? 1 : 0
@@ -317,10 +311,6 @@ async function performSyncActiveFeeds(force: boolean): Promise<void> {
       eventType: 'news_feed_updated',
       data: { count: inMemoryArticles.size, batchIndex: i }
     })
-  }
-
-  if (sourcesToFetch.length > 0) {
-    console.debug(`[runtime:momai-noticias] syncActiveFeeds done. Total in memory: ${inMemoryArticles.size}`)
   }
 }
 
@@ -963,7 +953,6 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
       profile.lastSyncAt = Date.now()
       await saveUserProfile(profile)
       const articles = await getAllArticles()
-      console.log(`[runtime:momai-noticias] refresh_feeds: ${articles.length} articles in cache after sync`)
       return { ok: true, totalArticles: articles.length }
     }
 
