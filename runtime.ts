@@ -145,21 +145,10 @@ async function fetchSingleFeed(source: FeedSource): Promise<NewsArticle[]> {
     const xml = decodeFeedBuffer(Buffer.from(arrayBuf), contentType)
     const parsed = parseFeedXml(xml, source)
 
-    // Store in memory
+    // Store in memory (persistence is batched by performSyncActiveFeeds: one
+    // storage transaction per sync instead of one per feed).
     for (const article of parsed) {
       inMemoryArticles.set(article.id, article)
-    }
-
-    // Persist to feed_cache collection
-    try {
-      if (parsed.length > 0) {
-        await storageBridge.collections.upsertMany('feed_cache', parsed)
-      }
-    } catch (err: any) {
-      console.warn(
-        `[runtime:momai-noticias] Failed to persist ${parsed.length} articles from ${source.id}:`,
-        err?.message || err
-      )
     }
 
     return parsed
@@ -301,16 +290,38 @@ async function performSyncActiveFeeds(force: boolean): Promise<void> {
     return bMain - aMain
   })
 
-  // Concurrency-limited fetch (max 5 simultaneous)
+  // Concurrency-limited fetch (max 5 simultaneous). Articles are persisted
+  // once at the end (chunked) so a 25-feed sync costs one storage transaction
+  // instead of 25 synchronous SQLite writes on the host event loop.
   const batchSize = 5
+  const pendingPersistence: any[] = []
   for (let i = 0; i < sortedSources.length; i += batchSize) {
     const batch = sortedSources.slice(i, i + batchSize)
-    await Promise.all(batch.map((s) => fetchSingleFeed(s)))
+    const results = await Promise.all(batch.map((s) => fetchSingleFeed(s)))
+    for (const parsed of results) {
+      if (parsed.length > 0) pendingPersistence.push(...parsed)
+    }
     safeSend({
       type: 'event',
       eventType: 'news_feed_updated',
       data: { count: inMemoryArticles.size, batchIndex: i }
     })
+  }
+
+  const PERSIST_CHUNK = 1000
+  for (let i = 0; i < pendingPersistence.length; i += PERSIST_CHUNK) {
+    try {
+      await storageBridge.collections.upsertMany(
+        'feed_cache',
+        pendingPersistence.slice(i, i + PERSIST_CHUNK)
+      )
+    } catch (err: any) {
+      console.warn(
+        `[runtime:momai-noticias] Failed to persist ${pendingPersistence.length} articles:`,
+        err?.message || err
+      )
+      break
+    }
   }
 }
 
