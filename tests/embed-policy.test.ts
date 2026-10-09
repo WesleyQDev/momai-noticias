@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { evaluateEmbedPolicy, isKnownBlockedDomain } from '../src/services/embed-policy'
+import { evaluateEmbedPolicy } from '../src/services/embed-policy'
 
 describe('Embed policy', () => {
   it('allows embedding when the site sends no blocking header', () => {
@@ -37,14 +37,6 @@ describe('Embed policy', () => {
     })
 
     expect(policy.embeddable).toBe(false)
-  })
-
-  it('identifies known publishers that always block embedding', () => {
-    expect(isKnownBlockedDomain('https://g1.globo.com/sp/campinas/noticia.ghtml')).toBe(true)
-    expect(isKnownBlockedDomain('https://economia.uol.com.br/noticias/')).toBe(true)
-    expect(isKnownBlockedDomain('https://www.bbc.com/portuguese/articles/c00')).toBe(true)
-    expect(isKnownBlockedDomain('https://tecnoblog.net/noticias/teste')).toBe(false)
-    expect(isKnownBlockedDomain('')).toBe(false)
   })
 })
 

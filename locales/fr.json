@@ -78,7 +78,11 @@
     "finish": "Terminer et Découvrir",
     "back": "Retour",
     "customSourceAdded": "Source ajoutée avec succès !",
-    "customSourceError": "Impossible de trouver un flux RSS valide à cette adresse."
+    "customSourceError": "Impossible de trouver un flux RSS valide à cette adresse.",
+    "stepOf": "Étape {step} sur {total}",
+    "percent": "{percent}% terminé",
+    "customSourcePrivate": "Les adresses réseau locales ne sont pas autorisées.",
+    "customSourceHttpError": "Impossible d'accéder à cette adresse pour le moment."
   },
   "settings": {
     "filterSources": "Filtrer les sources par nom...",
@@ -120,7 +124,8 @@
       "viewNews": "Voir l'actualité",
       "customizeTitle": "Personnaliser les titres",
       "topic": "Sujet",
-      "allTopics": "Tous les sujets"
+      "allTopics": "Tous les sujets",
+      "error": "Impossible de charger les titres pour le moment."
     }
   },
   "languages": {

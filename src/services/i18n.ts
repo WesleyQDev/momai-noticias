@@ -73,6 +73,15 @@ export function translate(key: string, params: Record<string, any> = {}, lang?: 
   return result
 }
 
+export function translateErrorCode(
+  code: string | undefined,
+  t: (key: string, params?: Record<string, any>) => string
+): string {
+  if (code === 'private_url') return t('onboarding.customSourcePrivate')
+  if (code === 'source_http_error') return t('onboarding.customSourceHttpError')
+  return t('onboarding.customSourceError')
+}
+
 export function useExtensionLocale() {
   const [locale, setLocale] = useState(getAppLocale)
 

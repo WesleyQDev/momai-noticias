@@ -78,7 +78,11 @@
     "finish": "Finish & Explore",
     "back": "Back",
     "customSourceAdded": "Source added successfully!",
-    "customSourceError": "Could not find a valid RSS/Atom feed at this address."
+    "customSourceError": "Could not find a valid RSS/Atom feed at this address.",
+    "stepOf": "Step {step} of {total}",
+    "percent": "{percent}% complete",
+    "customSourcePrivate": "Local network addresses are not allowed.",
+    "customSourceHttpError": "Could not reach that address right now."
   },
   "settings": {
     "filterSources": "Filter sources by name...",
@@ -120,7 +124,8 @@
       "viewNews": "Read news",
       "customizeTitle": "Customize headlines",
       "topic": "Topic",
-      "allTopics": "All topics"
+      "allTopics": "All topics",
+      "error": "Could not load headlines right now."
     }
   },
   "languages": {

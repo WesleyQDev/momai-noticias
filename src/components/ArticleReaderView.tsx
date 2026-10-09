@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import type { ArticleFeedback, NewsArticle } from '../services/types'
 import { useExtensionLocale } from '../services/i18n'
 import { THEME_CLASSES } from '../services/theme'
+import { newsApi } from '../services/api'
 
 interface ArticleReaderViewProps {
   article: NewsArticle
@@ -11,6 +12,8 @@ interface ArticleReaderViewProps {
   onToggleSave: (article: NewsArticle) => void
   onBack: () => void
 }
+
+type EmbedStatus = 'checking' | 'embeddable' | 'blocked'
 
 export const ArticleReaderView: React.FC<ArticleReaderViewProps> = ({
   article,
@@ -24,6 +27,7 @@ export const ArticleReaderView: React.FC<ArticleReaderViewProps> = ({
   const [copied, setCopied] = useState(false)
   const [isLoadingIframe, setIsLoadingIframe] = useState(true)
   const [iframeKey, setIframeKey] = useState(0)
+  const [embedStatus, setEmbedStatus] = useState<EmbedStatus>('checking')
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
   // Escape key handler to go back
@@ -36,6 +40,39 @@ export const ArticleReaderView: React.FC<ArticleReaderViewProps> = ({
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onBack])
+
+  // Ask the worker whether the site allows being framed (X-Frame-Options /
+  // CSP frame-ancestors). The check is header based, so any site is covered
+  // without a hardcoded list. A failed check does not block reading: the
+  // reader falls back to embedding and offers "open in browser".
+  useEffect(() => {
+    let alive = true
+    setEmbedStatus('checking')
+    setIsLoadingIframe(true)
+    setIframeKey(0)
+
+    if (!article.url) {
+      setEmbedStatus('blocked')
+      setIsLoadingIframe(false)
+      return () => {
+        alive = false
+      }
+    }
+
+    newsApi
+      .checkArticleEmbed(article.url)
+      .then((res) => {
+        if (!alive) return
+        setEmbedStatus(res.ok && res.embeddable === false ? 'blocked' : 'embeddable')
+      })
+      .catch(() => {
+        if (alive) setEmbedStatus('embeddable')
+      })
+
+    return () => {
+      alive = false
+    }
+  }, [article.url])
 
   const handleCopyLink = () => {
     if (article.url) {
@@ -160,25 +197,41 @@ export const ArticleReaderView: React.FC<ArticleReaderViewProps> = ({
       </div>
 
       {/* Loading bar */}
-      {isLoadingIframe && (
+      {isLoadingIframe && embedStatus === 'embeddable' && (
         <div className="w-full h-0.5 bg-sidebar overflow-hidden shrink-0">
           <div className="w-full h-full bg-accent animate-pulse" />
         </div>
       )}
 
-      {/* Direct In-App Live Article Viewer */}
-      <div className="flex-1 w-full h-full relative bg-white">
-        <iframe
-          key={iframeKey}
-          ref={iframeRef}
-          src={article.url}
-          title={article.title}
-          onLoad={() => setIsLoadingIframe(false)}
-          className="w-full h-full border-0"
-          allow="autoplay; fullscreen; picture-in-picture; clipboard-read; clipboard-write; encrypted-media; gyroscope; accelerometer; web-share"
-          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation allow-downloads"
-        />
-      </div>
+      {embedStatus === 'checking' ? (
+        <div className="flex-1 w-full h-full flex items-center justify-center bg-bg">
+          <p className="text-xs text-text-muted">{t('app.loading')}</p>
+        </div>
+      ) : embedStatus === 'blocked' ? (
+        <div className="flex-1 w-full h-full flex flex-col items-center justify-center text-center px-6 bg-bg">
+          <h2 className="text-base font-bold text-text mb-1">{t('app.embedBlockedTitle')}</h2>
+          <p className="text-xs text-text-muted max-w-md mb-5">
+            {t('app.embedBlockedDesc', { site: domain })}
+          </p>
+          <button onClick={handleOpenExternal} className={`${THEME_CLASSES.buttonPrimary} text-xs`}>
+            {t('app.openInBrowser')}
+          </button>
+        </div>
+      ) : (
+        /* Direct In-App Live Article Viewer */
+        <div className="flex-1 w-full h-full relative bg-white">
+          <iframe
+            key={iframeKey}
+            ref={iframeRef}
+            src={article.url}
+            title={article.title}
+            onLoad={() => setIsLoadingIframe(false)}
+            className="w-full h-full border-0"
+            allow="autoplay; fullscreen; picture-in-picture; clipboard-read; clipboard-write; encrypted-media; gyroscope; accelerometer; web-share"
+            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation allow-downloads"
+          />
+        </div>
+      )}
     </div>
   )
 }

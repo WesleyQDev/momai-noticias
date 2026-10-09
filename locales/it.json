@@ -78,7 +78,11 @@
     "finish": "Completa ed Esplora",
     "back": "Indietro",
     "customSourceAdded": "Fonte aggiunta con successo!",
-    "customSourceError": "Impossibile trovare un feed RSS valido a questo indirizzo."
+    "customSourceError": "Impossibile trovare un feed RSS valido a questo indirizzo.",
+    "stepOf": "Passaggio {step} di {total}",
+    "percent": "{percent}% completato",
+    "customSourcePrivate": "Gli indirizzi di rete locale non sono consentiti.",
+    "customSourceHttpError": "Impossibile raggiungere questo indirizzo ora."
   },
   "settings": {
     "filterSources": "Filtra le fonti per nome...",
@@ -120,7 +124,8 @@
       "viewNews": "Leggi notizia",
       "customizeTitle": "Personalizza i titoli",
       "topic": "Argomento",
-      "allTopics": "Tutti gli argomenti"
+      "allTopics": "Tutti gli argomenti",
+      "error": "Impossibile caricare i titoli ora."
     }
   },
   "languages": {

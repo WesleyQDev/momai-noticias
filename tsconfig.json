@@ -18,5 +18,5 @@
       "momai:registry": ["../../momai/apps/momai/src/renderer/src/components/chat/SkillResponseRegistry.ts"]
     }
   },
-  "include": ["src/**/*", "tests/**/*"]
+  "include": ["src/**/*", "tests/**/*", "runtime.ts", "storage-ipc.ts"]
 }

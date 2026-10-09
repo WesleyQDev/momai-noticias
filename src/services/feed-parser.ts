@@ -9,6 +9,9 @@ export function sanitizeUrl(rawUrl: string): string {
   try {
     const unescaped = rawUrl.split('&amp;').join('&').trim()
     const parsed = new URL(unescaped)
+    // Article links are opened in the in-app reader and in external windows:
+    // anything that is not a web URL (javascript:, data:, file:) is dropped.
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return ''
     const trackingParams = [
       'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
       'fbclid', 'gclid', 'msclkid', 'mc_cid', 'mc_eid', '_ga', '_gl', 'ref'

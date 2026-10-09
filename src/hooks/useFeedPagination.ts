@@ -20,7 +20,8 @@ export interface PageResult {
   error?: string
 }
 
-export function useFeedPagination() {
+export function useFeedPagination(options?: { isActive?: boolean }) {
+  const isActive = options?.isActive ?? true
   const [articles, setArticles] = useState<NewsArticle[]>([])
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
@@ -51,6 +52,7 @@ export function useFeedPagination() {
   useExtensionEvents({
     eventType: 'news_feed_updated',
     onEvent: () => {
+      if (!isActive) return
       if (pageRef.current === 1 && !loadingRef.current) {
         clearSyncTimer()
         syncTimerRef.current = setTimeout(() => {
@@ -65,6 +67,7 @@ export function useFeedPagination() {
   // first page is replayed silently so new articles appear without a reload.
   const scheduleSyncRefetch = useCallback(() => {
     clearSyncTimer()
+    if (!isActive) return
     if (pageRef.current !== 1) return
     if (syncAttemptsRef.current >= MAX_SYNC_REFETCHES) return
     syncAttemptsRef.current += 1
@@ -72,7 +75,7 @@ export function useFeedPagination() {
       syncTimerRef.current = null
       void goToPageRef.current(1, { silent: true })
     }, SYNC_REFETCH_DELAY_MS)
-  }, [clearSyncTimer])
+  }, [clearSyncTimer, isActive])
 
   useEffect(() => clearSyncTimer, [clearSyncTimer])
 

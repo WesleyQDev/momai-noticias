@@ -50,7 +50,7 @@ export const newsApi = {
     executeCommand<{ ok: boolean; sources: (FeedSource & { isFollowed: boolean; isBlocked: boolean })[] }>('list_sources', { language }),
 
   addCustomSource: (url: string, title?: string, language?: string) =>
-    executeCommand<{ ok: boolean; source?: FeedSource; error?: string }>('add_custom_source', { url, title, language }),
+    executeCommand<{ ok: boolean; source?: FeedSource; error?: string; errorCode?: string }>('add_custom_source', { url, title, language }),
 
   discoverFeed: (url: string) =>
     executeCommand<{ ok: boolean; feeds?: { url: string; title?: string }[]; error?: string }>('discover_feed', { url }),

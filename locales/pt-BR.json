@@ -78,7 +78,11 @@
     "finish": "Concluir e Explorar",
     "back": "Voltar",
     "customSourceAdded": "Fonte adicionada com sucesso!",
-    "customSourceError": "Não foi possível encontrar um feed RSS neste endereço."
+    "customSourceError": "Não foi possível encontrar um feed RSS neste endereço.",
+    "stepOf": "Etapa {step} de {total}",
+    "percent": "{percent}% concluído",
+    "customSourcePrivate": "Endereços de rede local não são permitidos.",
+    "customSourceHttpError": "Não foi possível acessar esse endereço agora."
   },
   "settings": {
     "filterSources": "Filtrar fontes por nome...",
@@ -120,7 +124,8 @@
       "viewNews": "Ver notícia",
       "customizeTitle": "Personalizar manchetes",
       "topic": "Tema",
-      "allTopics": "Todos os temas"
+      "allTopics": "Todos os temas",
+      "error": "Não foi possível carregar as manchetes agora."
     }
   },
   "languages": {

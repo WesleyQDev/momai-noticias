@@ -2,6 +2,8 @@
 // Main application page for MomAI Notícias extension
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { useExtensionEvents } from 'momai:events'
+import { useExtensionVisibility } from 'momai:sdk'
 import { newsApi } from './services/api'
 import { useFeedPagination } from './hooks/useFeedPagination'
 import { useExtensionLocale } from './services/i18n'
@@ -16,7 +18,8 @@ import { OnboardingModal } from './components/OnboardingModal'
 import { SourcesSettingsModal } from './components/SourcesSettingsModal'
 import { ArticleReaderView } from './components/ArticleReaderView'
 
-export const NewsPage: React.FC<{ isActive?: boolean }> = () => {
+export const NewsPage: React.FC<{ isActive?: boolean }> = ({ isActive: propIsActive }) => {
+  const isPageActive = useExtensionVisibility(propIsActive, 'momai-noticias')
   const { t } = useExtensionLocale()
   const {
     articles,
@@ -28,7 +31,7 @@ export const NewsPage: React.FC<{ isActive?: boolean }> = () => {
     loadFirstPage,
     goToPage,
     setStatic
-  } = useFeedPagination()
+  } = useFeedPagination({ isActive: isPageActive })
 
   const [profile, setProfile] = useState<UserProfile>(DEFAULT_USER_PROFILE)
   const [curatedSources, setCuratedSources] = useState<FeedSource[]>([])
@@ -51,6 +54,23 @@ export const NewsPage: React.FC<{ isActive?: boolean }> = () => {
 
   const initialLoadDone = useRef(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  // Articles saved from the chat panel or by the assistant arrive through this
+  // event; refresh the list so the saved counter never goes stale.
+  const refreshSavedArticles = useCallback(async () => {
+    const res = await newsApi.listSavedArticles()
+    if (res.ok && Array.isArray(res.articles)) {
+      setSavedArticles(res.articles)
+      setSavedArticleIds(new Set(res.articles.map((a) => a.id || a.url)))
+    }
+  }, [])
+
+  useExtensionEvents({
+    eventType: 'news_article_saved',
+    onEvent: () => {
+      void refreshSavedArticles()
+    }
+  })
 
   // Listen to sidebar clicks and deep-link article navigations
   useEffect(() => {
@@ -332,14 +352,18 @@ export const NewsPage: React.FC<{ isActive?: boolean }> = () => {
 
   const handleOnboardingComplete = async (newProfile: UserProfile) => {
     setShowOnboarding(false)
-    setProfile(newProfile)
-    await newsApi.updateProfile(newProfile)
+    const res = await newsApi.updateProfile(newProfile)
+    // Adopt the server profile: it may contain custom sources added during
+    // onboarding that the local snapshot did not have.
+    setProfile(res.ok && res.profile ? res.profile : newProfile)
     handleRefresh()
   }
 
-  const handleSettingsSave = async (updated: UserProfile) => {
-    setProfile(updated)
-    await newsApi.updateProfile(updated)
+  const handleSettingsSave = async (updated: Partial<UserProfile>) => {
+    const res = await newsApi.updateProfile(updated)
+    if (res.ok && res.profile) {
+      setProfile(res.profile)
+    }
     handleRefresh()
   }
 

@@ -207,6 +207,33 @@ export function applyDiversityLimit(articles: NewsArticle[], maxConsecutivePerSo
   return result
 }
 
+/**
+ * Deduplicates, scores and orders the whole corpus once. Callers that need
+ * several filtered views of the same corpus (e.g. the daily briefing by
+ * topic) must reuse this result instead of re-scoring every time.
+ */
+export function scoreFeedArticles(
+  articles: NewsArticle[],
+  profile: UserProfile,
+  seenIds: Set<string> = new Set(),
+  shuffleSeed?: string | number
+): NewsArticle[] {
+  const deduped = deduplicateArticles(articles)
+  const scored = deduped
+    .map((a) => {
+      const score = calculateArticleScore(a, profile, seenIds)
+      return { ...a, score }
+    })
+    .filter((a) => a.score > 0)
+
+  scored.sort((a, b) => (b.score || 0) - (a.score || 0))
+
+  if (shuffleSeed !== undefined && String(shuffleSeed).length > 0) {
+    return breakScoreTies(scored, shuffleSeed)
+  }
+  return scored
+}
+
 export function rankAndFilterFeed(
   articles: NewsArticle[],
   profile: UserProfile,
@@ -216,17 +243,9 @@ export function rankAndFilterFeed(
   onlyFollowed = false,
   shuffleSeed?: string | number
 ): NewsArticle[] {
-  // Deduplicate first
-  const deduped = deduplicateArticles(articles)
-
-  // Score articles
-  const scored = deduped.map((a) => {
-    const score = calculateArticleScore(a, profile, seenIds)
-    return { ...a, score }
-  }).filter((a) => a.score > 0)
+  let filtered = scoreFeedArticles(articles, profile, seenIds, shuffleSeed)
 
   // Filter by topic if specified
-  let filtered = scored
   if (filterTopic && filterTopic !== 'all' && filterTopic !== 'paravoce') {
     const normTopic = filterTopic.toLowerCase().trim()
     filtered = filtered.filter((a) => {
@@ -243,13 +262,6 @@ export function rankAndFilterFeed(
   if (onlyFollowed) {
     const followedSet = new Set(profile.followedSources || [])
     filtered = filtered.filter((a) => followedSet.has(a.sourceId))
-  }
-
-  // Sort by score descending
-  filtered.sort((a, b) => (b.score || 0) - (a.score || 0))
-
-  if (shuffleSeed !== undefined && String(shuffleSeed).length > 0) {
-    filtered = breakScoreTies(filtered, shuffleSeed)
   }
 
   // Apply diversity

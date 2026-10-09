@@ -7,15 +7,16 @@ import path from 'node:path'
 import { parseFeedXml, sanitizeUrl, extractImageFromHtml, decodeFeedBuffer, upgradeImageUrl } from './src/services/feed-parser.ts'
 import { extractFeedUrlsFromHtml, COMMON_FEED_PATHS } from './src/services/discovery.ts'
 import { resolveCatalogPath } from './src/services/catalog-path.ts'
-import { rankAndFilterFeed, deduplicateArticles, decayAffinities } from './src/services/ranking.ts'
+import { rankAndFilterFeed, scoreFeedArticles, applyDiversityLimit, decayAffinities } from './src/services/ranking.ts'
 import { createFeedPageStore, readFeedPage } from './src/services/feed-pages.ts'
 import { resolveFeedSeed, shouldReuseSession } from './src/services/feed-shuffle.ts'
 import { evaluateEmbedPolicy } from './src/services/embed-policy.ts'
 import { buildFeedMix, spreadSameCategory, ensureFirstOfTopicHasPhoto } from './src/services/feed-mix.ts'
 import { extractInterestTerms } from './src/services/interest-terms.ts'
 import { classifyTextToTopics } from './src/services/categories.ts'
+import { resolveUserProfile, mergeCustomSources } from './src/services/profile.ts'
+import { isPrivateNetworkUrl } from './src/services/url-safety.ts'
 import type { NewsArticle, FeedSource, UserProfile, CanonicalTopic, SavedArticle } from './src/services/types.ts'
-import { DEFAULT_USER_PROFILE } from './src/services/types.ts'
 
 function safeSend(msg: any) {
   try {
@@ -27,12 +28,20 @@ function safeSend(msg: any) {
   }
 }
 
-process.on('uncaughtException', (err: any) => {
-  console.error('[runtime:momai-noticias] Uncaught exception:', err)
-})
-process.on('unhandledRejection', (reason: any) => {
-  console.error('[runtime:momai-noticias] Unhandled rejection:', reason)
-})
+// Persistent-worker mode is the only context where this module owns the
+// process: it receives IPC commands and keeps timers/state alive. When the
+// backend loads the runtime in-process (non-background extensions), global
+// handlers would leak into the host process, so they stay disabled here.
+const IS_PERSISTENT = process.env.MOMAI_PERSISTENT === 'true'
+
+if (IS_PERSISTENT) {
+  process.on('uncaughtException', (err: any) => {
+    console.error('[runtime:momai-noticias] Uncaught exception:', err)
+  })
+  process.on('unhandledRejection', (reason: any) => {
+    console.error('[runtime:momai-noticias] Unhandled rejection:', reason)
+  })
+}
 import { createIpcNewsStorage } from './storage-ipc.ts'
 
 let storageResponseListener: ((msg: any) => void) | null = null
@@ -42,6 +51,15 @@ const storageBridge = createIpcNewsStorage({
     storageResponseListener = listener
   }
 })
+
+// Routes a host storage response to the bridge. The IPC handler uses it and
+// the integration tests call it directly, since they cannot emit on the
+// process 'message' channel without colliding with the test runner.
+export function handleStorageResponse(msg: any): void {
+  try {
+    storageResponseListener?.(msg)
+  } catch {}
+}
 
 // Load Catalog
 let curatedSources: FeedSource[] = []
@@ -60,8 +78,47 @@ const inMemoryArticles = new Map<string, NewsArticle>()
 const feedHttpCache = new Map<string, { etag?: string; lastModified?: string; lastFetchedAt: number }>()
 const ogImageCache = new Map<string, string>()
 const embedPolicyCache = new Map<string, { embeddable: boolean; reason?: string }>()
+const OG_IMAGE_CACHE_MAX = 500
+const EMBED_POLICY_CACHE_MAX = 500
 // Scroll sessions for the infinite feed (see src/services/feed-pages.ts).
 const feedPageStore = createFeedPageStore()
+
+function setCapped<K, V>(map: Map<K, V>, key: K, value: V, maxEntries: number): void {
+  if (!map.has(key) && map.size >= maxEntries) {
+    const oldest = map.keys().next().value
+    if (oldest !== undefined) map.delete(oldest)
+  }
+  map.set(key, value)
+}
+
+const OG_HTML_LIMIT_BYTES = 128 * 1024
+
+// Reads only the beginning of an HTML response: article pages can be several
+// megabytes and all the og:image meta tags live in the <head>.
+async function readLimitedText(res: Response, maxBytes: number): Promise<string> {
+  const body = res.body as ReadableStream<Uint8Array> | null
+  if (!body || typeof (body as any).getReader !== 'function') {
+    return res.text()
+  }
+  const reader = body.getReader()
+  const chunks: Uint8Array[] = []
+  let total = 0
+  try {
+    while (total < maxBytes) {
+      const { done, value } = await reader.read()
+      if (done) break
+      if (value) {
+        chunks.push(value)
+        total += value.length
+      }
+    }
+  } finally {
+    try {
+      await reader.cancel()
+    } catch {}
+  }
+  return Buffer.concat(chunks.map((chunk) => Buffer.from(chunk))).toString('utf8')
+}
 
 const USER_AGENT = 'MomAI-News-Reader/1.0 (+https://github.com/WesleyQDev/momai)'
 const FETCH_TIMEOUT_MS = 9000
@@ -71,20 +128,10 @@ async function getUserProfile(): Promise<UserProfile> {
   try {
     const profile = await storageBridge.storage.get('news_user_profile')
     if (profile && typeof profile === 'object') {
-      const merged: UserProfile = { ...DEFAULT_USER_PROFILE, ...profile }
-      if (!merged.languages || merged.languages.length === 0) {
-        merged.languages = ['pt-BR']
-      }
-      if (!merged.followedSources || merged.followedSources.length === 0) {
-        merged.followedSources = curatedSources.filter((s) => merged.languages.includes(s.language)).map((s) => s.id)
-      }
-      return merged
+      return resolveUserProfile(profile, curatedSources)
     }
   } catch {}
-  return {
-    ...DEFAULT_USER_PROFILE,
-    followedSources: curatedSources.filter((s) => s.language === 'pt-BR').map((s) => s.id)
-  }
+  return resolveUserProfile(null, curatedSources)
 }
 
 async function saveUserProfile(profile: UserProfile): Promise<void> {
@@ -92,6 +139,19 @@ async function saveUserProfile(profile: UserProfile): Promise<void> {
     await storageBridge.storage.set('news_user_profile', profile)
   } catch (err) {
     console.error('[runtime:momai-noticias] Failed to save profile:', err)
+  }
+}
+
+// Refreshes only the sync mark from a fresh read, so a sync that finished
+// while tool calls changed the profile cannot overwrite those changes with a
+// stale snapshot.
+async function markLastSync(): Promise<void> {
+  try {
+    const current = await getUserProfile()
+    current.lastSyncAt = Date.now()
+    await saveUserProfile(current)
+  } catch (err: any) {
+    console.warn('[runtime:momai-noticias] Failed to persist lastSyncAt:', err?.message || err)
   }
 }
 
@@ -127,7 +187,14 @@ async function fetchSingleFeed(source: FeedSource): Promise<NewsArticle[]> {
     clearTimeout(timer)
 
     if (res.status === 304) {
-      // Not modified
+      // Not modified: keep the validators and refresh the freshness mark so
+      // the 15-minute sync filter does not refetch every feed again.
+      const cached = feedHttpCache.get(source.feed)
+      feedHttpCache.set(source.feed, {
+        etag: cached?.etag,
+        lastModified: cached?.lastModified,
+        lastFetchedAt: Date.now()
+      })
       return []
     }
 
@@ -161,6 +228,7 @@ async function fetchSingleFeed(source: FeedSource): Promise<NewsArticle[]> {
 // Lazy OpenGraph image fetcher
 async function fetchOgImage(url: string): Promise<string | undefined> {
   if (ogImageCache.has(url)) return ogImageCache.get(url)
+  if (isPrivateNetworkUrl(url)) return undefined
   try {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), 4000)
@@ -170,7 +238,7 @@ async function fetchOgImage(url: string): Promise<string | undefined> {
     })
     clearTimeout(timer)
     if (!res.ok) return undefined
-    const html = await res.text()
+    const html = await readLimitedText(res, OG_HTML_LIMIT_BYTES)
 
     const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) ||
                     html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i) ||
@@ -181,7 +249,7 @@ async function fetchOgImage(url: string): Promise<string | undefined> {
         rawImg = new URL(rawImg, url).toString()
       } catch {}
       const imgUrl = upgradeImageUrl(rawImg) || rawImg
-      ogImageCache.set(url, imgUrl)
+      setCapped(ogImageCache, url, imgUrl, OG_IMAGE_CACHE_MAX)
       return imgUrl
     }
   } catch {}
@@ -189,11 +257,16 @@ async function fetchOgImage(url: string): Promise<string | undefined> {
 }
 
 // Discover RSS/Atom feed from website URL
-async function discoverFeedUrl(rawSiteUrl: string): Promise<{ ok: boolean; feeds?: { url: string; title?: string }[]; error?: string }> {
+async function discoverFeedUrl(rawSiteUrl: string): Promise<{ ok: boolean; feeds?: { url: string; title?: string }[]; error?: string; errorCode?: string }> {
   try {
     let target = rawSiteUrl.trim()
     if (!target.startsWith('http://') && !target.startsWith('https://')) {
       target = 'https://' + target
+    }
+
+    // User/assistant supplied URLs must not reach internal services.
+    if (isPrivateNetworkUrl(target)) {
+      return { ok: false, errorCode: 'private_url', error: 'Endereço de rede privada não permitido.' }
     }
 
     const controller = new AbortController()
@@ -206,7 +279,7 @@ async function discoverFeedUrl(rawSiteUrl: string): Promise<{ ok: boolean; feeds
     clearTimeout(timer)
 
     if (!res.ok) {
-      return { ok: false, error: `Não foi possível acessar a página (HTTP ${res.status}).` }
+      return { ok: false, errorCode: 'source_http_error', error: `Não foi possível acessar a página (HTTP ${res.status}).` }
     }
 
     const contentType = res.headers.get('content-type') || ''
@@ -253,13 +326,46 @@ async function discoverFeedUrl(rawSiteUrl: string): Promise<{ ok: boolean; feeds
       } catch {}
     }
 
-    return { ok: false, error: 'Nenhum feed RSS ou Atom foi encontrado neste endereço.' }
+    return { ok: false, errorCode: 'feed_not_found', error: 'Nenhum feed RSS ou Atom foi encontrado neste endereço.' }
   } catch (err: any) {
-    return { ok: false, error: err?.message || 'Falha ao descobrir feed' }
+    return { ok: false, errorCode: 'discovery_failed', error: err?.message || 'Falha ao descobrir feed' }
   }
 }
 
 // Fetch all active feeds based on user profile
+const BREAKING_ALERT_WINDOW_MS = 90 * 60 * 1000
+const BREAKING_ALERT_MAX_IDS = 500
+const emittedBreakingIds = new Set<string>()
+
+// Emits at most one urgent-news event per sync, only for a fresh article from
+// a source the user follows. Automations listening to news_breaking_alert get
+// a real signal without a notification storm.
+function emitBreakingAlert(profile: UserProfile, articles: NewsArticle[]): void {
+  const followed = new Set(profile.followedSources || [])
+  if (followed.size === 0) return
+
+  const cutoff = Date.now() - BREAKING_ALERT_WINDOW_MS
+  let candidate: NewsArticle | null = null
+  for (const article of articles) {
+    if (!article.id || !followed.has(article.sourceId)) continue
+    if (!article.publishedAt || article.publishedAt < cutoff) continue
+    if (emittedBreakingIds.has(article.id)) continue
+    if (!candidate || article.publishedAt > candidate.publishedAt) candidate = article
+  }
+  if (!candidate) return
+
+  emittedBreakingIds.add(candidate.id)
+  if (emittedBreakingIds.size > BREAKING_ALERT_MAX_IDS) {
+    const oldest = emittedBreakingIds.values().next().value
+    if (oldest !== undefined) emittedBreakingIds.delete(oldest)
+  }
+  safeSend({
+    type: 'event',
+    eventType: 'news_breaking_alert',
+    data: { title: candidate.title, sourceName: candidate.sourceName, url: candidate.url }
+  })
+}
+
 async function performSyncActiveFeeds(force: boolean): Promise<void> {
   const profile = await getUserProfile()
   const allSources = [...curatedSources, ...(profile.customSources || [])]
@@ -294,7 +400,7 @@ async function performSyncActiveFeeds(force: boolean): Promise<void> {
   // once at the end (chunked) so a 25-feed sync costs one storage transaction
   // instead of 25 synchronous SQLite writes on the host event loop.
   const batchSize = 5
-  const pendingPersistence: any[] = []
+  const pendingPersistence: NewsArticle[] = []
   for (let i = 0; i < sortedSources.length; i += batchSize) {
     const batch = sortedSources.slice(i, i + batchSize)
     const results = await Promise.all(batch.map((s) => fetchSingleFeed(s)))
@@ -323,6 +429,8 @@ async function performSyncActiveFeeds(force: boolean): Promise<void> {
       break
     }
   }
+
+  emitBreakingAlert(profile, pendingPersistence)
 }
 
 let syncInFlight: Promise<void> | null = null
@@ -361,24 +469,36 @@ async function pruneOldArticles(retentionDays = 3): Promise<void> {
     }
   }
 
-  // Prune feed_cache collection in batches
+  // Prune feed_cache collection page by page. The cutoff may sit beyond the
+  // first page, so the scan must continue until the collection is exhausted
+  // instead of stopping at the first page without old articles.
+  const PAGE_SIZE = 500
+  const MAX_PAGES = 100
   try {
-    let hasMore = true
-    let attempts = 0
-    while (hasMore && attempts < 20) {
-      attempts++
-      const list = await storageBridge.collections.list<NewsArticle>('feed_cache', { limit: 500 })
+    let offset = 0
+    for (let page = 0; page < MAX_PAGES; page++) {
+      const list = await storageBridge.collections.list<NewsArticle>('feed_cache', {
+        limit: PAGE_SIZE,
+        offset,
+        orderBy: 'publishedAt'
+      })
       if (!Array.isArray(list) || list.length === 0) break
+
       let removedCount = 0
       for (const a of list) {
-        if (a && a.publishedAt && a.publishedAt < cutoff) {
+        if (a && a.id && a.publishedAt && a.publishedAt < cutoff) {
           await storageBridge.collections.remove('feed_cache', { id: a.id })
           removedCount++
         }
       }
-      if (removedCount === 0 || list.length < 500) break
+
+      if (list.length < PAGE_SIZE) break
+      // Removed rows shift the next window left; only advance past survivors.
+      offset += list.length - removedCount
     }
-  } catch {}
+  } catch (err: any) {
+    console.warn('[runtime:momai-noticias] Failed to prune feed_cache:', err?.message || err)
+  }
 }
 
 // Ensure articles are populated from in-memory or collection cache
@@ -492,31 +612,39 @@ function resolveArticleTerms(articleId: string, providedTitle?: any): string[] {
   return title ? extractInterestTerms(title) : []
 }
 
-// Background initial preload & auto-prune on startup
-setTimeout(async () => {
-  try {
-    const profile = await getUserProfile()
-    await getAllArticles()
-    await pruneOldArticles(profile.retentionDays || 3)
-    // Sync feeds on startup in the background
-    await syncActiveFeeds(true)
-    profile.lastSyncAt = Date.now()
-    await saveUserProfile(profile)
-  } catch (err: any) {
-    console.warn('[runtime:momai-noticias] Initial preload error:', err?.message || err)
-  }
-}, 50)
+// Background initial preload & auto-prune on startup. These timers only make
+// sense in the long-lived worker process; in-process runtimes would leak them
+// into the host.
+if (IS_PERSISTENT) {
+  // Preload and initial sync on background startup (staggered to avoid boot contention)
+  setTimeout(async () => {
+    try {
+      const profile = await getUserProfile()
+      const cached = await getAllArticles()
+      await pruneOldArticles(profile.retentionDays || 3)
+      const lastSync = profile.lastSyncAt || 0
+      const isStale = Date.now() - lastSync > 15 * 60 * 1000
+      if (cached.length === 0 || isStale) {
+        await syncActiveFeeds(cached.length === 0)
+        await markLastSync()
+      }
+    } catch (err: any) {
+      console.warn('[runtime:momai-noticias] Initial preload error:', err?.message || err)
+    }
+  }, 10000)
 
-// Periodic background auto-sync & prune (every 15 minutes)
-setInterval(async () => {
-  try {
-    const profile = await getUserProfile()
-    await syncActiveFeeds(false)
-    await pruneOldArticles(profile.retentionDays || 3)
-  } catch (err: any) {
-    console.warn('[runtime:momai-noticias] Auto sync error:', err?.message || err)
-  }
-}, 15 * 60 * 1000)
+  // Periodic background auto-sync & prune (every 15 minutes)
+  setInterval(async () => {
+    try {
+      const profile = await getUserProfile()
+      await syncActiveFeeds(false)
+      await pruneOldArticles(profile.retentionDays || 3)
+      await markLastSync()
+    } catch (err: any) {
+      console.warn('[runtime:momai-noticias] Auto sync error:', err?.message || err)
+    }
+  }, 15 * 60 * 1000)
+}
 
 // Execute Tool Handler
 async function executeTool(toolName: string, args: Record<string, any> = {}): Promise<any> {
@@ -553,10 +681,7 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
         if (isRefresh) {
           syncing = true
           syncActiveFeeds(true)
-            .then(async () => {
-              profile.lastSyncAt = Date.now()
-              await saveUserProfile(profile)
-            })
+            .then(() => markLastSync())
             .catch((err) => {
               console.warn('[runtime:momai-noticias] Background refresh sync error:', err?.message || err)
             })
@@ -565,10 +690,7 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
         } else if (isStaleFeed) {
           syncing = true
           syncActiveFeeds(false)
-            .then(async () => {
-              profile.lastSyncAt = Date.now()
-              await saveUserProfile(profile)
-            })
+            .then(() => markLastSync())
             .catch((err) => {
               console.warn('[runtime:momai-noticias] Background sync error:', err?.message || err)
             })
@@ -648,7 +770,9 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
       const query = String(args?.query || '').trim()
       if (!query) return { ok: false, error: 'Termo de busca obrigatório.' }
 
-      await syncActiveFeeds(false)
+      // Search serves the cache immediately; the background refresh must not
+      // block the answer because a full sync can outlive the caller timeout.
+      void syncActiveFeeds(false)
       const articles = await getAllArticles()
 
       const normQuery = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -674,11 +798,13 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
     }
 
     case 'get_briefing': {
-      await syncActiveFeeds(false)
       let articles = await getAllArticles()
       if (articles.length === 0) {
         await syncActiveFeeds(true)
         articles = await getAllArticles()
+      } else {
+        // Same as search: refresh in the background, answer from cache now.
+        void syncActiveFeeds(false)
       }
 
       const limitPerTopic = Math.min(Math.max(Number(args?.limitPerTopic) || 3, 1), 6)
@@ -701,8 +827,14 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
         geral: 'Geral'
       }
 
+      // Score the whole corpus once and reuse it for every topic instead of
+      // re-scoring thousands of articles per topic.
+      const scored = scoreFeedArticles(articles, profile, seenIds)
+
       for (const t of topics) {
-        const rankedForTopic = rankAndFilterFeed(articles, profile, seenIds, t)
+        const rankedForTopic = ensureFirstOfTopicHasPhoto(
+          applyDiversityLimit(scored.filter((article) => (article.canonicalTopics || []).includes(t)))
+        )
         if (rankedForTopic.length > 0) {
           briefing.push({
             topic: t,
@@ -751,7 +883,11 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
 
       const discovery = await discoverFeedUrl(url)
       if (!discovery.ok || !discovery.feeds || discovery.feeds.length === 0) {
-        return { ok: false, error: discovery.error || 'Nenhum feed encontrado.' }
+        return {
+          ok: false,
+          error: discovery.error || 'Nenhum feed encontrado.',
+          errorCode: discovery.errorCode || 'feed_not_found'
+        }
       }
 
       const feedInfo = discovery.feeds[0]
@@ -846,10 +982,13 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
     }
 
     case 'update_profile': {
-      const updates = args?.updates || args || {}
+      const updates = (args?.updates || args || {}) as Partial<UserProfile>
       const updatedProfile: UserProfile = {
         ...profile,
         ...updates,
+        // A caller saving a form may hold a snapshot older than a source just
+        // added through add_custom_source; merging by id keeps both.
+        customSources: mergeCustomSources(profile.customSources, updates.customSources),
         version: profile.version
       }
       await saveUserProfile(updatedProfile)
@@ -915,16 +1054,20 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
       inMemoryArticles.clear()
       feedHttpCache.clear()
       ogImageCache.clear()
+      embedPolicyCache.clear()
       try {
-        const list = await storageBridge.collections.list('feed_cache')
-        if (Array.isArray(list)) {
-          for (const a of list) {
+        // Bulk clear when the host supports it; fall back to one remove per item.
+        await storageBridge.collections.clear('feed_cache')
+      } catch {
+        try {
+          const list = await storageBridge.collections.list<NewsArticle>('feed_cache')
+          for (const a of Array.isArray(list) ? list : []) {
             if (a && a.id) {
               await storageBridge.collections.remove('feed_cache', { id: a.id })
             }
           }
-        }
-      } catch {}
+        } catch {}
+      }
       return { ok: true, clearedCount, directResponse: 'Cache de notícias limpo com sucesso.' }
     }
 
@@ -961,8 +1104,7 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
 
     case 'refresh_feeds': {
       await syncActiveFeeds(true)
-      profile.lastSyncAt = Date.now()
-      await saveUserProfile(profile)
+      await markLastSync()
       const articles = await getAllArticles()
       return { ok: true, totalArticles: articles.length }
     }
@@ -982,6 +1124,11 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
       const cached = embedPolicyCache.get(url)
       if (cached) return { ok: true, ...cached }
 
+      // Internal addresses must not be fetched (or framed) by the reader.
+      if (isPrivateNetworkUrl(url)) {
+        return { ok: true, embeddable: false, reason: 'private_network' }
+      }
+
       try {
         const controller = new AbortController()
         const timer = setTimeout(() => controller.abort(), 6000)
@@ -992,14 +1139,14 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
           signal: controller.signal
         })
         clearTimeout(timer)
-        const policy = evaluateEmbedPolicy({
-          xFrameOptions: res.headers.get('x-frame-options'),
-          contentSecurityPolicy: res.headers.get('content-security-policy')
-        })
-        // Headers are all we need; release the body without downloading it.
-        res.body?.cancel().catch(() => {})
-        embedPolicyCache.set(url, policy)
-        return { ok: true, ...policy }
+      const policy = evaluateEmbedPolicy({
+        xFrameOptions: res.headers.get('x-frame-options'),
+        contentSecurityPolicy: res.headers.get('content-security-policy')
+      })
+      // Headers are all we need; release the body without downloading it.
+      res.body?.cancel().catch(() => {})
+      setCapped(embedPolicyCache, url, policy, EMBED_POLICY_CACHE_MAX)
+      return { ok: true, ...policy }
       } catch (err: any) {
         console.warn('[runtime:momai-noticias] Embed check failed for', url, err?.message || err)
         // Network failure is not a framing policy: let the reader try the page.
@@ -1015,41 +1162,47 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
 // Persistent workers are forked by the host straight from
 // manifest.backgroundScript and must announce readiness/liveness: without the
 // 'ready' signal the host waits 45s and then restarts the worker mid-sync.
-if (process.env.MOMAI_PERSISTENT === 'true') {
+// Everything below owns only the forked worker process; an in-process runtime
+// must not touch the host process globals or IPC channel.
+let executeQueue: Promise<void> = Promise.resolve()
+
+if (IS_PERSISTENT) {
   safeSend({ type: 'ready' })
   setInterval(() => safeSend({ type: 'heartbeat', timestamp: Date.now() }), 30000)
-}
 
-// Process incoming IPC messages from MomAI extension host
-process.on('message', async (msg: any) => {
-  if (!msg || typeof msg !== 'object') return
-  if (msg.type === 'storage-response') {
-    try {
-      storageResponseListener?.(msg)
-    } catch {}
-    return
-  }
-  if (msg.type === 'execute') {
-    const { requestId, payload } = msg
-    const { toolName, args } = payload || {}
-    try {
-      const result = await executeTool(toolName, args)
-      safeSend({ type: 'response', requestId, result })
-    } catch (err: any) {
-      safeSend({
-        type: 'response',
-        requestId,
-        result: { ok: false, error: err?.message || String(err) }
-      })
+  // Process incoming IPC messages from MomAI extension host
+  process.on('message', (msg: any) => {
+    if (!msg || typeof msg !== 'object') return
+    if (msg.type === 'storage-response') {
+      handleStorageResponse(msg)
+      return
     }
-  } else if (msg.type === 'shutdown') {
-    process.exit(0)
-  }
-})
+    if (msg.type === 'execute') {
+      const { requestId, payload } = msg
+      const { toolName, args } = payload || {}
+      // Tool calls run one at a time: overlapping calls would each save a full
+      // profile snapshot and the last write would drop the first one.
+      executeQueue = executeQueue.then(async () => {
+        try {
+          const result = await executeTool(toolName, args)
+          safeSend({ type: 'response', requestId, result })
+        } catch (err: any) {
+          safeSend({
+            type: 'response',
+            requestId,
+            result: { ok: false, error: err?.message || String(err) }
+          })
+        }
+      })
+    } else if (msg.type === 'shutdown') {
+      process.exit(0)
+    }
+  })
 
-process.on('disconnect', () => {
-  process.exit(0)
-})
+  process.on('disconnect', () => {
+    process.exit(0)
+  })
+}
 
 export default {
   execute: executeTool,

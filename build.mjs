@@ -1,5 +1,5 @@
 import { build, context } from 'esbuild'
-import { readFileSync, mkdirSync, existsSync } from 'node:fs'
+import { readFileSync, mkdirSync, existsSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -114,6 +114,13 @@ if (process.argv.includes('--watch')) {
   }
   if (existsSync(path.join(__dirname, 'runtime.ts'))) {
     await build(runtimeOptions)
-    console.log('[momai-noticias:build] Built Runtime → dist/runtime.js')
+    // The extension package.json declares "type": "module", which makes Node
+    // treat dist/*.js as ESM and breaks the CommonJS worker bundle
+    // (module is not defined). Pin the format for everything inside dist.
+    writeFileSync(
+      path.join(__dirname, 'dist', 'package.json'),
+      JSON.stringify({ type: 'commonjs' }, null, 2) + '\n'
+    )
+    console.log('[momai-noticias:build] Built Runtime → dist/runtime.js (CommonJS)')
   }
 }

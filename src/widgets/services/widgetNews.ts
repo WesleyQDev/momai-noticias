@@ -8,6 +8,9 @@ import { mapHeadlineItems, type HeadlineRow } from './headlineItems'
  */
 export async function fetchHeadlineStories(limit = 20, topic?: string, seed?: string): Promise<HeadlineRow[]> {
   const res = await newsApi.getFeed({ limit, ...(topic ? { topic } : {}), ...(seed ? { seed } : {}) })
+  if (!res?.ok) {
+    throw new Error(res?.error || 'headlines_unavailable')
+  }
   const articles: unknown[] = Array.isArray((res as any)?.articles)
     ? (res as any).articles
     : []

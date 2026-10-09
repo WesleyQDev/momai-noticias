@@ -24,6 +24,9 @@ export function extractFeedUrlsFromHtml(html: string, baseUrl: string): Discover
       if (hrefMatch && hrefMatch[1]) {
         try {
           const resolvedUrl = new URL(hrefMatch[1], baseUrl).toString()
+          // Feeds are fetched by the worker: only web URLs are acceptable, so
+          // a hostile page cannot hand over a javascript:/data: feed.
+          if (!/^https?:/i.test(resolvedUrl)) continue
           feeds.push({
             feedUrl: resolvedUrl,
             title: titleMatch ? titleMatch[1] : undefined,

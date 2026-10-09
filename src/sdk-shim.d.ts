@@ -35,6 +35,7 @@ declare module 'momai:sdk' {
   const sdk: MomAISDK
   export default sdk
   export function getSDK(): MomAISDK
+  export function useExtensionVisibility(explicitIsActive?: boolean, extensionId?: string): boolean
 }
 
 declare module 'momai:registry' {

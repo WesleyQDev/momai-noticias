@@ -78,7 +78,11 @@
     "finish": "Finalizar y Explorar",
     "back": "Volver",
     "customSourceAdded": "¡Fuente añadida con éxito!",
-    "customSourceError": "No se encontró un feed RSS válido en esta dirección."
+    "customSourceError": "No se encontró un feed RSS válido en esta dirección.",
+    "stepOf": "Paso {step} de {total}",
+    "percent": "{percent}% completado",
+    "customSourcePrivate": "No se permiten direcciones de red local.",
+    "customSourceHttpError": "No se pudo acceder a esa dirección ahora."
   },
   "settings": {
     "filterSources": "Filtrar fuentes por nombre...",
@@ -120,7 +124,8 @@
       "viewNews": "Ver noticia",
       "customizeTitle": "Personalizar titulares",
       "topic": "Tema",
-      "allTopics": "Todos los temas"
+      "allTopics": "Todos los temas",
+      "error": "No se pudieron cargar los titulares ahora."
     }
   },
   "languages": {

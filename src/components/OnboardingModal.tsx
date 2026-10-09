@@ -2,9 +2,10 @@
 import React, { useState } from 'react'
 import newsIconPng from '../../icon.png'
 import type { UserProfile, CanonicalTopic, FeedSource } from '../services/types'
-import { useExtensionLocale } from '../services/i18n'
+import { useExtensionLocale, translateErrorCode } from '../services/i18n'
 import { THEME_CLASSES } from '../services/theme'
 import { newsApi } from '../services/api'
+import { AVAILABLE_LANGUAGES, CANONICAL_TOPICS } from '../services/onboarding-options'
 
 interface OnboardingModalProps {
   initialProfile: UserProfile
@@ -12,27 +13,6 @@ interface OnboardingModalProps {
   onComplete: (profile: UserProfile) => void
   onClose?: () => void
 }
-
-const AVAILABLE_LANGUAGES = [
-  { code: 'pt-BR', label: 'Português (Brasil)', flag: '🇧🇷' },
-  { code: 'en-US', label: 'English (US)', flag: '🇺🇸' },
-  { code: 'es', label: 'Español', flag: '🇪🇸' },
-  { code: 'fr', label: 'Français', flag: '🇫🇷' },
-  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
-  { code: 'it', label: 'Italiano', flag: '🇮🇹' }
-]
-
-const CANONICAL_TOPICS: { id: CanonicalTopic; labelKey: string; icon: string }[] = [
-  { id: 'tecnologia', labelKey: 'topics.tecnologia', icon: '💻' },
-  { id: 'economia', labelKey: 'topics.economia', icon: '📈' },
-  { id: 'politica', labelKey: 'topics.politica', icon: '🏛️' },
-  { id: 'ciencia', labelKey: 'topics.ciencia', icon: '🔬' },
-  { id: 'esportes', labelKey: 'topics.esportes', icon: '⚽' },
-  { id: 'cultura', labelKey: 'topics.cultura', icon: '🎬' },
-  { id: 'games', labelKey: 'topics.games', icon: '🎮' },
-  { id: 'saude', labelKey: 'topics.saude', icon: '🏥' },
-  { id: 'mundo', labelKey: 'topics.mundo', icon: '🌍' }
-]
 
 export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   initialProfile,
@@ -138,7 +118,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
         setFollowedSources((prev) => [...prev, res.source!.id])
         setCustomUrl('')
       } else {
-        setCustomMessage({ text: res.error || t('onboarding.customSourceError'), isError: true })
+        setCustomMessage({ text: translateErrorCode(res.errorCode, t), isError: true })
       }
     } catch {
       setCustomMessage({ text: t('onboarding.customSourceError'), isError: true })
@@ -204,8 +184,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           {/* Progress Bar & Header */}
           <div className="space-y-3">
             <div className="flex items-center justify-between text-xs text-text-muted font-medium">
-              <span>Etapa {step} de 4</span>
-              <span>{Math.round((step / 4) * 100)}% concluído</span>
+              <span>{t('onboarding.stepOf', { step, total: 4 })}</span>
+              <span>{t('onboarding.percent', { percent: Math.round((step / 4) * 100) })}</span>
             </div>
             <div className="h-2 w-full bg-sidebar rounded-full overflow-hidden border border-border/50">
               <div
@@ -244,7 +224,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       >
                         <span className="flex items-center gap-3">
                           <span className="text-xl">{lang.flag}</span>
-                          <span>{lang.label}</span>
+                          <span>{t(lang.labelKey)}</span>
                         </span>
                         {isSelected && (
                           <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-white">
@@ -344,7 +324,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                         <div className="flex items-center justify-between font-bold text-text text-xs border-b border-border/60 pb-2">
                           <span className="flex items-center gap-1.5">
                             <span>{langInfo?.flag}</span>
-                            <span>{langInfo?.label || langCode}</span>
+                            <span>{langInfo ? t(langInfo.labelKey) : langCode}</span>
                           </span>
                           <span className="text-text-muted text-[11px] font-normal">
                             {t('onboarding.sourcesSelected', { count: followedCount, total: langSources.length })}

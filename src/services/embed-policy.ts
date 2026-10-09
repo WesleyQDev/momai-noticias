@@ -18,37 +18,6 @@ function firstDirectiveValue(value: string): string {
   return value.split(',')[0].trim().toLowerCase()
 }
 
-const KNOWN_BLOCKED_DOMAINS = [
-  'globo.com',
-  'g1.globo.com',
-  'oglobo.globo.com',
-  'ge.globo.com',
-  'valor.globo.com',
-  'uol.com.br',
-  'folha.uol.com.br',
-  'noticias.uol.com.br',
-  'economia.uol.com.br',
-  'esporte.uol.com.br',
-  'tvefamosos.uol.com.br',
-  'estadao.com.br',
-  'bbc.com',
-  'bbc.co.uk',
-  'cnnbrasil.com.br',
-  'r7.com',
-  'terra.com.br',
-  'olhardigital.com.br'
-]
-
-export function isKnownBlockedDomain(rawUrl: string): boolean {
-  if (!rawUrl) return false
-  try {
-    const hostname = new URL(rawUrl).hostname.toLowerCase().replace(/^www\./, '')
-    return KNOWN_BLOCKED_DOMAINS.some((d) => hostname === d || hostname.endsWith(`.${d}`))
-  } catch {
-    return false
-  }
-}
-
 export function evaluateEmbedPolicy(input: EmbedPolicyInput): EmbedPolicy {
   const xFrameOptions = String(input.xFrameOptions || '').trim()
   if (xFrameOptions) {

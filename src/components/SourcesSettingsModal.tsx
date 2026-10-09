@@ -1,38 +1,18 @@
 // src/components/SourcesSettingsModal.tsx
 import React, { useState } from 'react'
 import type { UserProfile, CanonicalTopic, FeedSource } from '../services/types'
-import { useExtensionLocale } from '../services/i18n'
+import { useExtensionLocale, translateErrorCode } from '../services/i18n'
 import { THEME_CLASSES } from '../services/theme'
 import { newsApi } from '../services/api'
+import { AVAILABLE_LANGUAGES, CANONICAL_TOPICS } from '../services/onboarding-options'
 
 interface SourcesSettingsModalProps {
   profile: UserProfile
   curatedSources: FeedSource[]
-  onSave: (updated: UserProfile) => void
+  onSave: (updated: Partial<UserProfile>) => void
   onResetOnboarding: () => void
   onClose: () => void
 }
-
-const AVAILABLE_LANGUAGES = [
-  { code: 'pt-BR', label: 'Português (Brasil)', flag: '🇧🇷' },
-  { code: 'en-US', label: 'English (US)', flag: '🇺🇸' },
-  { code: 'es', label: 'Español', flag: '🇪🇸' },
-  { code: 'fr', label: 'Français', flag: '🇫🇷' },
-  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
-  { code: 'it', label: 'Italiano', flag: '🇮🇹' }
-]
-
-const CANONICAL_TOPICS: { id: CanonicalTopic; labelKey: string; icon: string }[] = [
-  { id: 'tecnologia', labelKey: 'topics.tecnologia', icon: '💻' },
-  { id: 'economia', labelKey: 'topics.economia', icon: '📈' },
-  { id: 'politica', labelKey: 'topics.politica', icon: '🏛️' },
-  { id: 'ciencia', labelKey: 'topics.ciencia', icon: '🔬' },
-  { id: 'esportes', labelKey: 'topics.esportes', icon: '⚽' },
-  { id: 'cultura', labelKey: 'topics.cultura', icon: '🎬' },
-  { id: 'games', labelKey: 'topics.games', icon: '🎮' },
-  { id: 'saude', labelKey: 'topics.saude', icon: '🏥' },
-  { id: 'mundo', labelKey: 'topics.mundo', icon: '🌍' }
-]
 
 export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
   profile,
@@ -56,6 +36,9 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
   const [customUrl, setCustomUrl] = useState('')
   const [isAddingCustom, setIsAddingCustom] = useState(false)
   const [customError, setCustomError] = useState<string | null>(null)
+  // Sources added during this session, shown immediately even though the
+  // server-side profile has not been re-fetched yet.
+  const [addedSources, setAddedSources] = useState<FeedSource[]>([])
 
   const toggleLanguage = (code: string) => {
     setLanguages((prev) => (prev.includes(code) ? (prev.length > 1 ? prev.filter((c) => c !== code) : prev) : [...prev, code]))
@@ -94,10 +77,11 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
     try {
       const res = await newsApi.addCustomSource(customUrl.trim())
       if (res.ok && res.source) {
-        setFollowedSources((prev) => [...prev, res.source!.id])
+        setAddedSources((prev) => (prev.some((s) => s.id === res.source!.id) ? prev : [...prev, res.source!]))
+        setFollowedSources((prev) => (prev.includes(res.source!.id) ? prev : [...prev, res.source!.id]))
         setCustomUrl('')
       } else {
-        setCustomError(res.error || t('onboarding.customSourceError'))
+        setCustomError(translateErrorCode(res.errorCode, t))
       }
     } catch {
       setCustomError(t('onboarding.customSourceError'))
@@ -107,8 +91,10 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
   }
 
   const handleSaveAll = () => {
-    const updated: UserProfile = {
-      ...profile,
+    // Send only the fields this screen owns. The full profile (and its custom
+    // sources) is merged on the server, so a snapshot older than a source just
+    // added here cannot erase it.
+    const updates: Partial<UserProfile> = {
       languages,
       interests,
       followedSources,
@@ -116,11 +102,11 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
       mutedKeywords,
       retentionDays
     }
-    onSave(updated)
+    onSave(updates)
     onClose()
   }
 
-  const allSources = [...curatedSources, ...(profile.customSources || [])]
+  const allSources = [...curatedSources, ...(profile.customSources || []), ...addedSources]
 
   return (
     <div className="w-full h-full flex flex-col bg-bg text-text font-sans overflow-hidden">
@@ -220,7 +206,7 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
                     <div className="flex items-center justify-between font-bold text-text text-xs border-b border-border/60 pb-1.5">
                       <span className="flex items-center gap-2">
                         <span className="text-base">{langInfo.flag}</span>
-                        <span>{langInfo.label}</span>
+                        <span>{t(langInfo.labelKey)}</span>
                       </span>
                       <span className="text-text-muted text-[11px] font-normal">
                         {t('settings.sourcesFollowed', { count: followedCount, total: langSources.length })}
@@ -318,7 +304,7 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
                 >
                   <span className="flex items-center gap-3">
                     <span className="text-xl">{lang.flag}</span>
-                    <span>{lang.label}</span>
+                    <span>{t(lang.labelKey)}</span>
                   </span>
                   {isSelected && (
                     <span className="text-accent font-bold text-sm">✓</span>

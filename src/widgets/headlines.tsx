@@ -89,7 +89,7 @@ export default function NoticiasHeadlinesWidget({
       {loading ? (
         <WidgetLoading message={t('widget.headlines.loading')} />
       ) : error ? (
-        <WidgetState title={t('widget.headlines.title')} message={error} />
+        <WidgetState title={t('widget.headlines.title')} message={t('widget.headlines.error')} />
       ) : story ? (
         <StoryCard
           story={story}

@@ -1,12 +1,12 @@
 {
   "name": "momai-noticias",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "description": "Feed de notícias personalizado e curado estilo Google Discover para MomAI",
   "author": "WesleyQDev",
   "license": "MIT",
-  "main": "runtime.ts",
+  "main": "dist/runtime.js",
   "scripts": {
     "build": "node build.mjs",
     "watch": "node build.mjs --watch",

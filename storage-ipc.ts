@@ -39,7 +39,17 @@ export function createIpcNewsStorage({ send, onResponse, timeoutMs = 30000 }: {
       if (timer.unref) timer.unref()
       pending.set(requestId, { resolve, reject, timer })
       try {
-        send({ type: 'storage-request', requestId, method, args })
+        // The extension id travels with every request so the host never has to
+        // guess the owner from the last executed extension or a request-id
+        // prefix (which only exists for this extension anyway).
+        const extensionId = process.env.MOMAI_EXTENSION_ID || 'momai-noticias'
+        send({
+          type: 'storage-request',
+          requestId,
+          method,
+          args,
+          extensionId
+        })
       } catch (err) {
         pending.delete(requestId)
         clearTimeout(timer)
@@ -70,7 +80,7 @@ export function createIpcNewsStorage({ send, onResponse, timeoutMs = 30000 }: {
     },
     collections: area('collections', ['insert', 'list', 'count', 'search', 'remove', 'clear', 'upsert', 'upsertMany']) as {
       insert: (collection: string, item: any) => Promise<void>
-      list: (collection: string, filter?: any) => Promise<any[]>
+      list: <T = any>(collection: string, filter?: any) => Promise<T[]>
       count: (collection: string, filter?: any) => Promise<number>
       search: (collection: string, query: string) => Promise<any[]>
       remove: (collection: string, filter: any) => Promise<void>

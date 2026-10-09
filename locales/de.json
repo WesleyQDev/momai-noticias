@@ -78,7 +78,11 @@
     "finish": "Fertigstellen & Entdecken",
     "back": "Zurück",
     "customSourceAdded": "Quelle erfolgreich hinzugefügt!",
-    "customSourceError": "Unter dieser Adresse wurde kein gültiger RSS/Atom-Feed gefunden."
+    "customSourceError": "Unter dieser Adresse wurde kein gültiger RSS/Atom-Feed gefunden.",
+    "stepOf": "Schritt {step} von {total}",
+    "percent": "{percent}% abgeschlossen",
+    "customSourcePrivate": "Lokale Netzwerkadressen sind nicht erlaubt.",
+    "customSourceHttpError": "Die Adresse konnte gerade nicht erreicht werden."
   },
   "settings": {
     "filterSources": "Quellen nach Namen filtern...",
@@ -120,7 +124,8 @@
       "viewNews": "Nachricht ansehen",
       "customizeTitle": "Schlagzeilen anpassen",
       "topic": "Thema",
-      "allTopics": "Alle Themen"
+      "allTopics": "Alle Themen",
+      "error": "Schlagzeilen konnten gerade nicht geladen werden."
     }
   },
   "languages": {
