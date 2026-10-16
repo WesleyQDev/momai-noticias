@@ -1,7 +1,7 @@
 {
   "id": "momai-noticias",
   "name": "MomAI Notícias",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "category": "news",
   "tags": [
     "noticias",
@@ -437,9 +437,5 @@
   "theme": {
     "gradient": "from-sky-600 to-cyan-500",
     "accent": "cyan"
-  },
-  "toolPriority": {
-    "label": "NOTICIAS",
-    "rule": "consultar notícias, manchetes do dia, resumo de acontecimentos, feed Discover ou pesquisar artigos jornalísticos."
   }
 }

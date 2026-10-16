@@ -1,6 +1,6 @@
 ---
 name: Notícias
-description: Consulte as principais notícias, manchetes do dia, resumo de acontecimentos (briefing), feed Discover personalizado ou pesquise matérias e artigos jornalísticos. Use quando o usuário pedir notícias, novidades, o que está acontecendo no mundo/Brasil, cotações, resultados de jogos, tecnologia, política ou economia.
+description: Consulta manchetes do dia, notícias de última hora, resumos temáticos (política, economia, tecnologia, esportes, mundo) e matérias jornalísticas de fontes públicas de imprensa. Use quando o usuário perguntar o que está acontecendo no mundo ou no país, pedir resumos de notícias diárias, manchetes recentes ou cobertura de temas informativos.
 ---
 
 ## Instruções para o Assistente MomAI
