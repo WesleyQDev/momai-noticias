@@ -1,30 +1,22 @@
 # MomAI Nachrichten
 
-Ihr intelligenter, personalisierter Newsfeed im Google Discover-Stil — 100% lokal, privat und ohne Tracking.
+Ein Nachrichtenleser im Stil von Google Discover, ohne von MomAI eingefügte Werbung und mit Ihren Interessen im Mittelpunkt. Die Erweiterung lädt Nachrichten aus den Quellen, die Sie auswählen, und ordnet sie in MomAI.
 
-Erhalten Sie die wichtigsten Schlagzeilen aus Deutschland und der Welt, Technologie-Updates, Wirtschaftsnachrichten, Wissenschaft und Kultur an einem Ort.
+## Was Sie damit machen können
 
----
+- Bei der ersten Einrichtung Sprachen, Themen und Portale auswählen.
+- Mehr als 35 Quellen folgen, zum Beispiel BBC News, Reuters, The Verge, TechCrunch und Wired.
+- Jeden Blog oder jede Nachrichtenseite per Link hinzufügen. MomAI findet den RSS-Feed und trägt die Quelle ein.
+- Artikel für später speichern.
+- Im Chat um ein Tagesbriefing oder Nachrichten zu einem Thema bitten.
 
-## Hauptfunktionen
+## Beispiele
 
-- **Discover-Feed**: Ein übersichtlicher Newsfeed mit den relevantesten Artikeln des Tages.
-- **Individuelles Onboarding**: Wählen Sie Sprachen, Interessensgebiete und bevorzugte Nachrichtenquellen.
-- **Kuratierter Quellenkatalog**: Führende Publikationen (Der Spiegel, BBC News, Reuters, Wired und viele mehr).
-- **Eigene Quellen hinzufügen**: Fügen Sie einfach die URL einer beliebigen Website oder eines Blogs ein, um den RSS-Feed automatisch zu finden.
-- **Artikel merken**: Speichern Sie interessante Beiträge mit einem Klick für später.
-- **Chat-Integration**: Fragen Sie Ihren MomAI-Assistenten nach einem morgendlichen Briefing oder spezifischen Themen.
-
----
-
-## Beispiele für den Chat
-
-- *"MomAI, was sind heute die wichtigsten Technik-Nachrichten?"*
-- *"Gib mir ein kurzes Briefing zu den aktuellen Schlagzeilen."*
-- *"Suche nach aktuellen Meldungen über künstliche Intelligenz."*
-
----
+- "Was sind heute die wichtigsten Technik-Nachrichten?"
+- "Gib mir ein Briefing zu den Nachrichten von heute."
+- "Was gab es zuletzt über Astronomie?"
+- "Suche Nachrichten über künstliche Intelligenz."
 
 ## Berechtigungen
 
-- **network (Netzwerk)**: Wird ausschließlich benötigt, um öffentliche RSS/Atom-Feeds Ihrer ausgewählten Quellen abzurufen.
+- **Netzwerk:** zum Laden der RSS- und Atom-Feeds der Quellen, denen Sie folgen. Ihr Verlauf und Ihre gespeicherten Artikel bleiben auf Ihrem Computer.

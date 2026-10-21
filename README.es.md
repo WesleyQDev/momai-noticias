@@ -1,30 +1,22 @@
 # MomAI Noticias
 
-Tu feed de noticias inteligente y personalizado estilo Google Discover, 100% privado, local y sin rastreo externo.
+Un lector de noticias al estilo de Google Discover, sin anuncios añadidos por MomAI y con tus intereses en el centro. La extensión descarga las noticias de las fuentes que eliges y las organiza en MomAI.
 
-Mantente al día con los principales titulares del mundo, tecnología, economía, deportes, ciencia y cultura en un solo lugar, curado según tus intereses personales.
+## Qué puedes hacer
 
----
+- Elegir idiomas, temas y portales en la primera configuración.
+- Seguir más de 35 fuentes, como BBC Mundo, Reuters, El País, The Verge y Wired.
+- Añadir cualquier blog o portal con el enlace. MomAI busca el feed RSS y registra la fuente.
+- Guardar artículos para leer después.
+- Pedir un resumen del día o noticias sobre un tema en el chat.
 
-## Características Principales
+## Ejemplos
 
-- **Feed estilo Discover**: Una experiencia visual limpia con las historias más importantes del día ordenadas según tus preferencias.
-- **Onboarding Personalizado**: Elige tus idiomas de lectura, temas de interés y los portales que más consultas.
-- **Catálogo de Fuentes Curadas**: Portales de noticias de primer nivel listos para seguir (El País, BBC, Reuters y muchos más).
-- **Añade tus Propios Sitios**: Escribe el enlace de cualquier blog o periódico y MomAI descubrirá el feed RSS automáticamente.
-- **Guardar para Después**: Guarda artículos interesantes con un solo clic.
-- **Integración con el Chat**: Pide resúmenes matutinos o novedades sobre cualquier tema directamente a tu asistente MomAI.
-
----
-
-## Ejemplos en el Chat
-
-- *"MomAI, ¿cuáles son las noticias más destacadas de tecnología hoy?"*
-- *"Dame un resumen de las principales noticias del día."*
-- *"Busca noticias recientes sobre economía e inversiones."*
-
----
+- "¿Cuáles son las principales noticias de tecnología hoy?"
+- "Dame un resumen de las noticias del día."
+- "¿Qué salió sobre astronomía recientemente?"
+- "Busca noticias sobre inteligencia artificial."
 
 ## Permisos
 
-- **network (Red)**: Utilizada únicamente para descargar las actualizaciones de los feeds RSS/Atom públicos de las fuentes que sigues.
+- **Red:** para descargar los feeds RSS y Atom de las fuentes que sigues. El historial y los artículos guardados quedan en tu computador.

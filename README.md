@@ -1,31 +1,22 @@
 # MomAI Notícias
 
-Seu feed de notícias inteligente e personalizado estilo Google Discover, 100% privado, local e sem anúncios invasivos.
+Um leitor de notícias no estilo Google Discover, sem anúncios adicionados pelo MomAI e com os seus interesses no centro. A extensão baixa as notícias das fontes que você escolhe e organiza tudo no MomAI.
 
-Acompanhe as principais manchetes do Brasil e do mundo, novidades sobre tecnologia, economia, esportes, ciência, cultura e jogos em um só lugar, com curadoria refinada de acordo com o seu gosto pessoal.
+## O que você pode fazer
 
----
+- Escolher idiomas, temas e portais na primeira configuração.
+- Acompanhar mais de 35 fontes, como G1, Folha, BBC Brasil, Canaltech, InfoMoney, The Verge e Reuters.
+- Adicionar qualquer blog ou portal pelo link. A MomAI procura o feed RSS e cadastra a fonte.
+- Salvar matérias para ler depois.
+- Pedir um resumo do dia ou notícias sobre um assunto no chat.
 
-## Principais Recursos
+## Exemplos
 
-- **Feed estilo Discover**: Uma experiência visual limpa com as matérias mais importantes do dia, ordenadas pelo que realmente interessa a você.
-- **Onboarding Personalizado**: Escolha seus idiomas de leitura, seus temas favoritos e os portais que você mais confia.
-- **Catálogo de Fontes Curadas**: Mais de 35 veículos e blogs consagrados prontos para acompanhar (G1, Tecnoblog, Folha, BBC Brasil, Canaltech, InfoMoney, The Verge, Reuters e muito mais).
-- **Adicione seus Próprios Sites**: Basta digitar o link de qualquer blog ou portal que a MomAI descobre e adiciona o feed RSS automaticamente.
-- **Salvar para Ler Depois**: Guarde artigos interessantes com um clique para consultar quando tiver tempo.
-- **Integração com o Chat**: Peça resumos do dia, novidades sobre qualquer tema ou um briefing matinal diretamente para a sua assistente.
-
----
-
-## Exemplos de Uso no Chat
-
-- *"MomAI, quais são as notícias mais importantes de tecnologia hoje?"*
-- *"Me dê um briefing com as principais notícias do dia."*
-- *"O que saiu sobre astronomia e ciência recentemente?"*
-- *"Pesquise notícias sobre inteligência artificial."*
-
----
+- "Quais são as principais notícias de tecnologia hoje?"
+- "Me dê um briefing do dia."
+- "O que saiu sobre astronomia recentemente?"
+- "Pesquise notícias sobre inteligência artificial."
 
 ## Permissões
 
-- **network (Rede)**: Necessária exclusivamente para baixar as atualizações dos feeds RSS/Atom públicos das fontes que você acompanha.
+- **Rede:** para baixar os feeds RSS e Atom das fontes que você acompanha. O histórico e os artigos salvos ficam no seu computador.

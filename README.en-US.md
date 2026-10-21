@@ -1,31 +1,22 @@
 # MomAI News
 
-Your smart, Google Discover-style personalized news feed — 100% private, local, and free from invasive tracking.
+A Google Discover-style news reader with no ads added by MomAI and your interests at the center. The extension downloads stories from the sources you choose and organizes them in MomAI.
 
-Stay up to date with global and local headlines, tech updates, market news, science, culture, and gaming all in one clean interface tailored to your preferences.
+## What you can do
 
----
+- Pick languages, topics, and publishers during the first setup.
+- Follow more than 35 sources, such as BBC News, Reuters, The Verge, TechCrunch, and Wired.
+- Add any blog or news site by link. MomAI finds the RSS feed and adds the source.
+- Save stories to read later.
+- Ask for a daily briefing or news about a topic in chat.
 
-## Key Features
+## Examples
 
-- **Discover-Style Feed**: A clean visual feed with the day's most relevant stories, ranked according to your genuine interests.
-- **Personalized Onboarding**: Pick your reading languages, favorite categories, and the publishers you trust most.
-- **Curated Source Catalog**: Top-tier outlets and blogs ready to follow (The Verge, TechCrunch, BBC News, Reuters, Wired, Ars Technica, and more).
-- **Add Custom Feeds**: Simply paste any website or blog link and MomAI will auto-discover the RSS feed.
-- **Bookmarks & Read Later**: Save interesting articles with a single click to read whenever you're ready.
-- **Chat Integration**: Ask your MomAI assistant for daily briefings, breaking news, or specific topic updates anytime.
-
----
-
-## Everyday Voice and Chat Examples
-
-- *"MomAI, what are the top tech headlines today?"*
-- *"Give me a quick briefing on today's major news."*
-- *"Any recent discoveries in astronomy and space?"*
-- *"Search for the latest news about artificial intelligence."*
-
----
+- "What are the top tech stories today?"
+- "Give me a briefing on today's news."
+- "What came out about astronomy recently?"
+- "Search for news about artificial intelligence."
 
 ## Permissions
 
-- **network**: Used exclusively to fetch public RSS/Atom feeds from your selected news sources.
+- **Network:** to download RSS and Atom feeds from the sources you follow. Your history and saved stories stay on your computer.

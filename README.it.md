@@ -1,30 +1,22 @@
 # MomAI Notizie
 
-Il tuo feed di notizie intelligente e personalizzato in stile Google Discover: 100% privato, locale e senza tracciamento.
+Un lettore di notizie in stile Google Discover, senza pubblicità aggiunte da MomAI e con i tuoi interessi al centro. L'estensione scarica le notizie dalle fonti che scegli e le organizza in MomAI.
 
-Rimani aggiornato con i principali titoli dall'Italia e dal mondo, tecnologia, economia, sport, scienza e cultura in un'unica interfaccia pulita.
+## Cosa puoi fare
 
----
+- Scegliere lingue, argomenti e testate durante la prima configurazione.
+- Seguire più di 35 fonti, come BBC News, Reuters, Il Post, The Verge e Wired.
+- Aggiungere qualsiasi blog o sito di notizie con il link. MomAI trova il feed RSS e registra la fonte.
+- Salvare articoli da leggere dopo.
+- Chiedere un riepilogo del giorno o notizie su un argomento nella chat.
 
-## Funzionalità Principali
+## Esempi
 
-- **Feed stile Discover**: Una panoramica visiva con le storie più importanti del giorno ordinate secondo i tuoi gusti.
-- **Onboarding Personalizzato**: Seleziona le tue lingue di lettura, i tuoi argomenti preferiti e le testate più affidabili.
-- **Catalogo di Fonti Curate**: Testate di riferimento pronte da seguire (Corriere della Sera, BBC News, Reuters e molte altre).
-- **Aggiungi Fonti Personalizzate**: Inserisci il link di qualsiasi sito o blog per rilevarne automaticamente il feed RSS.
-- **Salva per Dopo**: Salva gli articoli interessanti con un clic per leggerli quando vuoi.
-- **Integrazione con la Chat**: Chiedi aggiornamenti, briefing giornalieri o notizie su misura direttamente al tuo assistente MomAI.
+- "Quali sono le principali notizie di tecnologia oggi?"
+- "Fammi un riepilogo delle notizie del giorno."
+- "Cosa è uscito di recente sull'astronomia?"
+- "Cerca notizie sull'intelligenza artificiale."
 
----
+## Permessi
 
-## Esempi per la Chat
-
-- *"MomAI, quali sono le principali notizie di tecnologia di oggi?"*
-- *"Fammi un riepilogo delle notizie più importanti."*
-- *"Cerca articoli recenti sull'intelligenza artificiale."*
-
----
-
-## Autorizzazioni
-
-- **network (Rete)**: Utilizzata esclusivamente per scaricare gli aggiornamenti dei feed RSS/Atom pubblici delle fonti selezionate.
+- **Rete:** per scaricare i feed RSS e Atom delle fonti che segui. La cronologia e gli articoli salvati restano sul tuo computer.

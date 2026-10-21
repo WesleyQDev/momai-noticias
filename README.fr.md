@@ -1,30 +1,22 @@
 # MomAI Actualités
 
-Votre flux d'actualités intelligent et personnalisé style Google Discover, 100% privé, local et sans traçage publicitaire.
+Un lecteur d'actualités dans le style de Google Discover, sans publicité ajoutée par MomAI et avec vos centres d'intérêt au premier plan. L'extension télécharge les articles des sources que vous choisissez et les organise dans MomAI.
 
-Restez informé des gros titres internationaux, de la technologie, de l'économie, de la science et de la culture en un seul endroit, adapté à vos centres d'intérêt.
+## Ce que vous pouvez faire
 
----
+- Choisir les langues, les thèmes et les médias lors de la première configuration.
+- Suivre plus de 35 sources, comme BBC News, Reuters, Le Monde, The Verge et Wired.
+- Ajouter n'importe quel blog ou site d'actualités par son lien. MomAI trouve le flux RSS et enregistre la source.
+- Enregistrer des articles pour les lire plus tard.
+- Demander un briefing du jour ou des actualités sur un sujet dans le chat.
 
-## Fonctionnalités Principales
+## Exemples
 
-- **Flux style Discover** : Une interface moderne présentant les articles les plus pertinents du jour.
-- **Intégration Personnalisée** : Définissez vos langues, vos thèmes préférés et vos sources favorites.
-- **Catalogue de Sources Reconnues** : Des médias de premier plan (Le Monde, BBC News, Reuters, The Verge et plus).
-- **Ajout de Flux Personnalisés** : Entrez simplement l'adresse d'un site ou blog pour détecter son flux RSS.
-- **Articles Enregistrés** : Sauvegardez des articles en un clic pour les lire plus tard.
-- **Intégration avec le Chat** : Demandez un récapitulatif ou des informations ciblées à votre assistant MomAI.
-
----
-
-## Exemples dans le Chat
-
-- *"MomAI, quelles sont les dernières actualités technologiques ?"*
-- *"Donne-moi un résumé des gros titres du jour."*
-- *"Recherche des articles récents sur l'intelligence artificielle."*
-
----
+- « Quelles sont les principales actualités technologiques aujourd'hui ? »
+- « Donne-moi un briefing sur les actualités du jour. »
+- « Qu'est-ce qui est sorti récemment sur l'astronomie ? »
+- « Cherche des actualités sur l'intelligence artificielle. »
 
 ## Autorisations
 
-- **network (Réseau)** : Requise uniquement pour télécharger les flux RSS/Atom publics de vos sources d'information.
+- **Réseau :** pour télécharger les flux RSS et Atom des sources que vous suivez. Votre historique et vos articles enregistrés restent sur votre ordinateur.
