@@ -29,6 +29,16 @@ declare module 'momai:sdk' {
       registerRenderer(type: string, component: any): void
       getRenderer(type: string): any
     }
+    share?: {
+      open(payload: {
+        title?: string
+        text?: string
+        url?: string
+        files?: Array<{ name: string; path?: string; dataUrl?: string; mimeType?: string }>
+        [key: string]: any
+      }): Promise<{ shared: boolean; providerId?: string; error?: string }>
+      close(): void
+    }
     locale?: string
   }
 
