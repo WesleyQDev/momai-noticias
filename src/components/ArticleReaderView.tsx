@@ -238,7 +238,7 @@ export const ArticleReaderView: React.FC<ArticleReaderViewProps> = ({
         </div>
       ) : (
         /* Direct In-App Live Article Viewer */
-        <div className="flex-1 w-full h-full relative bg-white">
+        <div className="flex-1 w-full h-full relative bg-card">
           <iframe
             key={iframeKey}
             ref={iframeRef}

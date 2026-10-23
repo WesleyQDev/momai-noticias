@@ -47,15 +47,17 @@ export const ChatBriefingCard: React.FC<{ data?: BriefingResponse }> = ({ data }
                     rel="noopener noreferrer"
                     className="block group rounded bg-sidebar hover:bg-input transition-colors overflow-hidden"
                   >
-                    <img
-                      src={art.image}
-                      alt=""
-                      loading="lazy"
-                      className="w-full h-28 object-cover bg-input"
-                      referrerPolicy="no-referrer"
-                    />
+                    <div className="overflow-hidden">
+                      <img
+                        src={art.image}
+                        alt=""
+                        loading="lazy"
+                        className="w-full h-28 object-cover bg-input transition-transform duration-300 ease-out group-hover:scale-105"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
                     <div className="p-1.5">
-                      <div className="font-medium text-text group-hover:text-accent transition-colors line-clamp-1">
+                      <div className="font-medium text-text transition-all duration-200 group-hover:translate-x-1 group-hover:underline group-hover:decoration-text/40 group-hover:underline-offset-2 line-clamp-1">
                         {art.title}
                       </div>
                       <div className="text-[10px] text-text-muted mt-0.5">
@@ -71,7 +73,7 @@ export const ChatBriefingCard: React.FC<{ data?: BriefingResponse }> = ({ data }
                   rel="noopener noreferrer"
                   className="block group p-1.5 rounded bg-sidebar hover:bg-input transition-colors"
                 >
-                  <div className="font-medium text-text group-hover:text-accent transition-colors line-clamp-1">
+                  <div className="font-medium text-text transition-all duration-200 group-hover:translate-x-1 group-hover:underline group-hover:decoration-text/40 group-hover:underline-offset-2 line-clamp-1">
                     {art.title}
                   </div>
                   <div className="text-[10px] text-text-muted mt-0.5">

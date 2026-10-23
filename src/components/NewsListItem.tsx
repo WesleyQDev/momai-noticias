@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react'
 import type { ArticleFeedback, NewsArticle } from '../services/types'
 import { useExtensionLocale, formatRelativeTime } from '../services/i18n'
 import sdk from 'momai:sdk'
+import { isImageCached, markImageCached } from '../services/image-cache'
 
 interface NewsListItemProps {
   article: NewsArticle
@@ -13,6 +14,7 @@ interface NewsListItemProps {
   onFeedback?: (article: NewsArticle, type: ArticleFeedback) => void
   onToggleSave: (article: NewsArticle) => void
   onArticleClick: (article: NewsArticle) => void
+  priority?: boolean
 }
 
 export const NewsListItem: React.FC<NewsListItemProps> = ({
@@ -21,14 +23,19 @@ export const NewsListItem: React.FC<NewsListItemProps> = ({
   feedback = null,
   onFeedback,
   onToggleSave,
-  onArticleClick
+  onArticleClick,
+  priority = false
 }) => {
   const { t, locale } = useExtensionLocale()
   const [copied, setCopied] = useState(false)
   const [imageError, setImageError] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(() => isImageCached(article.image))
 
   useEffect(() => {
     setImageError(false)
+    if (isImageCached(article.image)) {
+      setImageLoaded(true)
+    }
   }, [article.id, article.image])
 
   const handleCopy = (event: React.MouseEvent) => {
@@ -63,7 +70,7 @@ export const NewsListItem: React.FC<NewsListItemProps> = ({
   return (
     <article
       onClick={() => onArticleClick(article)}
-      className="group cursor-pointer flex items-start gap-5 py-6 border-b border-border/60"
+      className="group cursor-pointer flex items-start gap-5 py-5 px-3.5 -mx-3.5 rounded-xl border-b border-border/60 transition-all duration-300 ease-out hover:bg-sidebar/40 hover:shadow-xs"
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 text-[11px] text-text-muted">
@@ -73,12 +80,12 @@ export const NewsListItem: React.FC<NewsListItemProps> = ({
           {isDifferentLanguage && <span className="shrink-0">({article.language})</span>}
         </div>
 
-        <h3 className="mt-1.5 text-base font-bold leading-snug tracking-tight text-text group-hover:text-accent transition-colors line-clamp-3">
+        <h3 className="mt-1.5 text-base font-bold leading-snug tracking-tight text-text transition-all duration-200 ease-out group-hover:translate-x-1.5 group-hover:underline group-hover:decoration-text/40 group-hover:underline-offset-4 line-clamp-3">
           {article.title}
         </h3>
 
         {article.summary && (
-          <p className="mt-1 text-[13px] leading-relaxed text-text-muted line-clamp-1">
+          <p className="mt-1 text-[13px] leading-relaxed text-text-muted transition-colors duration-200 group-hover:text-text/85 line-clamp-1">
             {article.summary}
           </p>
         )}
@@ -140,13 +147,20 @@ export const NewsListItem: React.FC<NewsListItemProps> = ({
       </div>
 
       {article.image && !imageError && (
-        <div className="w-40 h-28 shrink-0 overflow-hidden rounded-lg bg-sidebar">
+        <div className="w-40 h-28 shrink-0 overflow-hidden rounded-xl bg-sidebar relative shadow-xs transition-shadow duration-300 group-hover:shadow-md">
           <img
             src={article.image}
             alt={article.title}
             onError={() => setImageError(true)}
-            className="w-full h-full object-cover"
-            loading="lazy"
+            onLoad={() => {
+              markImageCached(article.image)
+              setImageLoaded(true)
+            }}
+            className={`w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-105 group-hover:brightness-[1.02] ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            loading={priority ? 'eager' : 'lazy'}
+            decoding="async"
             referrerPolicy="no-referrer"
           />
         </div>

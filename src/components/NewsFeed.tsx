@@ -104,7 +104,7 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({
   const totalLabel = t('app.totalArticles', { count: total })
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 sm:pt-10 pb-10">
       {lead && (
         <NewsLead
           key={lead.id || lead.url}
@@ -119,7 +119,7 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({
 
       <div className={`grid grid-cols-1 gap-10 mt-8 ${hasReadAlso ? 'sm:grid-cols-3' : ''}`}>
         <div className={hasReadAlso ? 'sm:col-span-2' : ''}>
-          <div className="flex items-center justify-between border-t-2 border-accent pt-3">
+          <div className="flex items-center justify-between border-t border-border pt-3">
             <h2 className="text-[11px] font-extrabold uppercase tracking-wide text-text">
               {isSearching ? t('app.searchResults') : t('app.moreNews')}
             </h2>
@@ -138,7 +138,7 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({
           </div>
 
           <div>
-            {listArticles.map((article) => (
+            {listArticles.map((article, index) => (
               <NewsListItem
                 key={article.id || article.url}
                 article={article}
@@ -147,6 +147,7 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({
                 onFeedback={onFeedback}
                 onToggleSave={onToggleSave}
                 onArticleClick={onArticleClick}
+                priority={index < 6}
               />
             ))}
             {isSyncing && !isSearching && listArticles.length < 4 && (

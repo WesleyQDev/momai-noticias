@@ -75,7 +75,7 @@ export default function MomAINoticiasPanel() {
               rel="noopener noreferrer"
               className="group block p-2 rounded-lg bg-card hover:bg-input border border-border transition-colors"
             >
-              <h4 className="font-semibold text-text group-hover:text-accent transition-colors line-clamp-2 leading-snug">
+              <h4 className="font-semibold text-text transition-transform duration-200 group-hover:translate-x-1 line-clamp-2 leading-snug">
                 {art.title}
               </h4>
               <div className="flex items-center gap-1.5 mt-1 text-[10px] text-text-muted">

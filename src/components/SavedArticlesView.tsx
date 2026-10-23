@@ -28,7 +28,7 @@ export const SavedArticlesView: React.FC<SavedArticlesViewProps> = ({
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-8">
-      <div className="flex items-center justify-between border-t-2 border-accent pt-3 mt-6">
+      <div className="flex items-center justify-between border-t border-border pt-3 mt-6">
         <h2 className="text-[11px] font-extrabold uppercase tracking-widest text-text">
           {t('app.saved')}
         </h2>

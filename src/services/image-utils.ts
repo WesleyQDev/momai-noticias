@@ -10,9 +10,14 @@ export function upgradeImageUrl(rawUrl?: string): string | undefined {
   let url = rawUrl.trim()
   if (!url.startsWith('http://') && !url.startsWith('https://')) return undefined
 
-  // 1. UOL: replace thumbnail dimensions (_v2_142x100, _142x100, _300x200, etc.) with HD 900x506
+  // 1. UOL: replace thumbnail dimensions (_v2_142x100, _142x100, _300x200, etc.) with HD 900x506.
+  // Partner images (/c/parceiros/) return 403 for 900x506, so use 300x200.
   if (url.includes('imguol.com.br') || url.includes('.imguol.com')) {
-    url = url.replace(/(_v2)?_\d+x\d+(\.[a-zA-Z0-9]+)$/i, (_match, _v2, ext) => `_v2_900x506${ext}`)
+    if (url.includes('/c/parceiros/')) {
+      url = url.replace(/(_v2)?_\d+x\d+(\.[a-zA-Z0-9]+)$/i, (_match, _v2, ext) => `_v2_300x200${ext}`)
+    } else {
+      url = url.replace(/(_v2)?_\d+x\d+(\.[a-zA-Z0-9]+)$/i, (_match, _v2, ext) => `_v2_900x506${ext}`)
+    }
   }
 
   // 2. BBC: upgrade low-res thumbnail paths (/ws/240/, /standard/240/, etc.) to HD (/standard/976/)

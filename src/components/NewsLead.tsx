@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import type { ArticleFeedback, NewsArticle } from '../services/types'
 import { useExtensionLocale, formatRelativeTime } from '../services/i18n'
 import sdk from 'momai:sdk'
+import { isImageCached, markImageCached } from '../services/image-cache'
 
 interface NewsLeadProps {
   article: NewsArticle
@@ -24,11 +25,29 @@ export const NewsLead: React.FC<NewsLeadProps> = ({
 }) => {
   const { t } = useExtensionLocale()
   const [copied, setCopied] = useState(false)
+  const [currentImage, setCurrentImage] = useState(article.image)
   const [imageError, setImageError] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(() => isImageCached(article.image))
 
   useEffect(() => {
     setImageError(false)
+    setCurrentImage(article.image)
+    if (isImageCached(article.image)) {
+      setImageLoaded(true)
+    }
   }, [article.id, article.image])
+
+  const handleImageError = () => {
+    // If an upgraded UOL/HD image returns 403/404, fallback to the 142x100 thumbnail before giving up
+    if (currentImage && /_v2_(900x506|300x200)/.test(currentImage)) {
+      const fallback = currentImage.replace(/_v2_(900x506|300x200)/, '_v2_142x100')
+      if (fallback !== currentImage) {
+        setCurrentImage(fallback)
+        return
+      }
+    }
+    setImageError(true)
+  }
 
   const handleCopy = (event: React.MouseEvent) => {
     event.stopPropagation()
@@ -58,21 +77,28 @@ export const NewsLead: React.FC<NewsLeadProps> = ({
   }
 
   const topic = article.canonicalTopics?.[0] || 'geral'
-  const hasImage = Boolean(article.image) && !imageError
+  const hasImage = Boolean(currentImage) && !imageError
 
   return (
     <article
       onClick={() => onArticleClick(article)}
-      className={`group cursor-pointer ${hasImage ? 'grid grid-cols-1 sm:grid-cols-2 gap-5' : 'block'} pt-6 pb-8 border-b border-border`}
+      className={`group cursor-pointer ${hasImage ? 'grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8' : 'block'} pb-2`}
     >
       {hasImage && (
-        <div className="w-full h-52 overflow-hidden rounded-lg bg-sidebar">
+        <div className="w-full h-56 sm:h-64 overflow-hidden rounded-xl bg-sidebar relative shadow-xs">
           <img
-            src={article.image}
+            src={currentImage}
             alt={article.title}
-            onError={() => setImageError(true)}
-            className="w-full h-full object-cover"
+            onError={handleImageError}
+            onLoad={() => {
+              if (currentImage) markImageCached(currentImage)
+              setImageLoaded(true)
+            }}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
             loading="eager"
+            decoding="async"
             referrerPolicy="no-referrer"
           />
         </div>
@@ -85,7 +111,7 @@ export const NewsLead: React.FC<NewsLeadProps> = ({
           <span className="text-text-muted truncate">{article.sourceName}</span>
         </div>
 
-        <h2 className="mt-2 text-2xl sm:text-3xl font-extrabold leading-tight tracking-tight text-text group-hover:text-accent transition-colors line-clamp-3">
+        <h2 className="mt-2.5 text-2xl sm:text-3xl font-extrabold leading-tight tracking-tight text-text line-clamp-3">
           {article.title}
         </h2>
 

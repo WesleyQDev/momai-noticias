@@ -63,7 +63,8 @@ export default function StoryCard({ story, mode, thumbWidth, onClick }: Props): 
           <img
             src={photo}
             alt=""
-            loading="lazy"
+            loading="eager"
+            decoding="async"
             draggable={false}
             referrerPolicy="no-referrer"
             onError={() => setBrokenImageId(story.id)}
@@ -87,7 +88,8 @@ export default function StoryCard({ story, mode, thumbWidth, onClick }: Props): 
         <img
           src={photo}
           alt=""
-          loading="lazy"
+          loading="eager"
+          decoding="async"
           draggable={false}
           referrerPolicy="no-referrer"
           onError={() => setBrokenImageId(story.id)}

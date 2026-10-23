@@ -96,8 +96,10 @@ export function stripHtml(htmlStr: string): string {
     .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => {
       try { return String.fromCharCode(parseInt(hex, 16)) } catch { return '' }
     })
-    .replace(/\s+/g, ' ')
-    .trim()
+
+  // Strip media and formatting tags that may have been entity-escaped (e.g. &lt;img ...&gt;)
+  clean = clean.replace(/<\/?(img|picture|source|figure|figcaption|a|p|div|span|br|iframe)[^>]*>/gi, ' ')
+  clean = clean.replace(/\s+/g, ' ').trim()
 
   return clean
 }

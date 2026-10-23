@@ -40,16 +40,18 @@ export const ChatNewsCard: React.FC<{ data?: { articles?: NewsArticle[]; query?:
             className="group flex items-start gap-2.5 p-2 rounded-lg bg-sidebar hover:bg-input transition-colors"
           >
             {art.image && (
-              <img
-                src={art.image}
-                alt=""
-                className="w-14 h-14 rounded-md object-cover shrink-0 bg-input"
-                loading="lazy"
-                referrerPolicy="no-referrer"
-              />
+              <div className="w-14 h-14 rounded-md overflow-hidden shrink-0 bg-input shadow-xs">
+                <img
+                  src={art.image}
+                  alt=""
+                  className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
             )}
             <div className="flex-1 min-w-0">
-              <h4 className="font-semibold text-text group-hover:text-accent transition-colors line-clamp-2 leading-snug">
+              <h4 className="font-semibold text-text transition-all duration-200 group-hover:translate-x-1 group-hover:underline group-hover:decoration-text/40 group-hover:underline-offset-2 line-clamp-2 leading-snug">
                 {art.title}
               </h4>
               <div className="flex items-center gap-1.5 mt-1 text-[10px] text-text-muted">
