@@ -8,7 +8,8 @@ import type {
   UserProfile,
   NewsArticle,
   SavedArticle,
-  ArticleFeedback
+  ArticleFeedback,
+  TickerResponse
 } from './types'
 
 export async function executeCommand<T = any>(toolName: string, args: Record<string, any> = {}, timeoutMs = 25000): Promise<T> {
@@ -93,5 +94,8 @@ export const newsApi = {
   }) => executeCommand<{ ok: boolean; feedback?: Record<string, ArticleFeedback>; error?: string }>('set_article_feedback', data),
 
   refreshFeeds: () =>
-    executeCommand<{ ok: boolean; totalArticles: number }>('refresh_feeds', {}, 35000)
+    executeCommand<{ ok: boolean; totalArticles: number }>('refresh_feeds', {}, 35000),
+
+  getTickerData: () =>
+    executeCommand<TickerResponse>('get_ticker_data', {}, 15000)
 }

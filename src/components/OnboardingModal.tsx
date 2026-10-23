@@ -5,7 +5,7 @@ import type { UserProfile, CanonicalTopic, FeedSource } from '../services/types'
 import { useExtensionLocale, translateErrorCode } from '../services/i18n'
 import { THEME_CLASSES } from '../services/theme'
 import { newsApi } from '../services/api'
-import { AVAILABLE_LANGUAGES, CANONICAL_TOPICS } from '../services/onboarding-options'
+import { AVAILABLE_LANGUAGES, CANONICAL_TOPICS, TICKER_NEWS_TYPES } from '../services/onboarding-options'
 
 interface OnboardingModalProps {
   initialProfile: UserProfile
@@ -36,6 +36,13 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     return ['tecnologia', 'economia', 'mundo', 'ciencia', 'esportes', 'cultura', 'games', 'saude', 'geral']
   })
 
+  const [tickerTypes, setTickerTypes] = useState<string[]>(() => {
+    if (initialProfile.tickerTypes && initialProfile.tickerTypes.length > 0) {
+      return initialProfile.tickerTypes
+    }
+    return ['quotes', 'polls', 'urgent', 'headlines']
+  })
+
   const [followedSources, setFollowedSources] = useState<string[]>(() => {
     if (initialProfile.followedSources && initialProfile.followedSources.length > 0) {
       return initialProfile.followedSources
@@ -52,6 +59,15 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   const [customUrl, setCustomUrl] = useState('')
   const [isAddingCustom, setIsAddingCustom] = useState(false)
   const [customMessage, setCustomMessage] = useState<{ text: string; isError?: boolean } | null>(null)
+
+  const toggleTickerType = (typeId: string) => {
+    setTickerTypes((prev) => {
+      if (prev.includes(typeId)) {
+        return prev.filter((id) => id !== typeId)
+      }
+      return [...prev, typeId]
+    })
+  }
 
   const toggleLanguage = (code: string) => {
     setLanguages((prev) => {
@@ -142,7 +158,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       languages: finalLanguages,
       interests: finalInterests,
       followedSources: finalFollowed,
-      mutedKeywords
+      mutedKeywords,
+      tickerTypes
     }
 
     onComplete(updatedProfile)
@@ -184,13 +201,13 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           {/* Progress Bar & Header */}
           <div className="space-y-3">
             <div className="flex items-center justify-between text-xs text-text-muted font-medium">
-              <span>{t('onboarding.stepOf', { step, total: 4 })}</span>
-              <span>{t('onboarding.percent', { percent: Math.round((step / 4) * 100) })}</span>
+              <span>{t('onboarding.stepOf', { step, total: 5 })}</span>
+              <span>{t('onboarding.percent', { percent: Math.round((step / 5) * 100) })}</span>
             </div>
             <div className="h-2 w-full bg-sidebar rounded-full overflow-hidden border border-border/50">
               <div
                 className="h-full bg-accent transition-all duration-300 rounded-full"
-                style={{ width: `${(step / 4) * 100}%` }}
+                style={{ width: `${(step / 5) * 100}%` }}
               />
             </div>
           </div>
@@ -227,7 +244,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                           <span>{t(lang.labelKey)}</span>
                         </span>
                         {isSelected && (
-                          <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-white">
+                          <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-bg">
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
@@ -274,15 +291,72 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               </div>
             )}
 
-            {/* Step 3: Sources */}
+            {/* Step 3: News Types & Highlights */}
             {step === 3 && (
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <div>
                   <h2 className="text-lg sm:text-xl font-bold text-text mb-1">
                     {t('onboarding.step3Title')}
                   </h2>
                   <p className="text-xs sm:text-sm text-text-muted">
                     {t('onboarding.step3Desc')}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  {TICKER_NEWS_TYPES.map((typeOption) => {
+                    const isSelected = tickerTypes.includes(typeOption.id)
+                    return (
+                      <button
+                        key={typeOption.id}
+                        type="button"
+                        onClick={() => toggleTickerType(typeOption.id)}
+                        className={`flex items-start gap-3.5 p-4 rounded-xl border text-left transition-all duration-200 select-none ${
+                          isSelected
+                            ? 'bg-accent/15 border-accent text-text shadow-xs'
+                            : 'bg-sidebar border-border text-text-muted hover:text-text hover:border-border/80'
+                        }`}
+                      >
+                        <span className="text-2xl shrink-0 mt-0.5">{typeOption.icon}</span>
+                        <div className="flex-1 min-w-0 pr-1">
+                          <div className="text-sm font-bold text-text mb-1">
+                            {t(typeOption.labelKey)}
+                          </div>
+                          <div className="text-xs text-text-muted leading-relaxed line-clamp-2">
+                            {t(typeOption.descKey)}
+                          </div>
+                        </div>
+                        <div
+                          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
+                            isSelected
+                              ? 'bg-accent text-bg shadow-xs'
+                              : 'bg-input text-text-muted border border-border/60'
+                          }`}
+                        >
+                          {isSelected ? (
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          ) : (
+                            '+'
+                          )}
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: Sources */}
+            {step === 4 && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-lg sm:text-xl font-bold text-text mb-1">
+                    {t('onboarding.step4Title')}
+                  </h2>
+                  <p className="text-xs sm:text-sm text-text-muted">
+                    {t('onboarding.step4Desc')}
                   </p>
                 </div>
 
@@ -349,7 +423,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                                   <div className="text-[10px] text-text-muted truncate">{source.homepage?.replace(/^https?:\/\//, '')}</div>
                                 </div>
                                 <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                                  isFollowed ? 'bg-accent text-white' : 'bg-input text-text-muted'
+                                  isFollowed ? 'bg-accent text-bg' : 'bg-input text-text-muted'
                                 }`}>
                                   {isFollowed ? '✓' : '+'}
                                 </div>
@@ -364,15 +438,15 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               </div>
             )}
 
-            {/* Step 4: Muted Keywords */}
-            {step === 4 && (
+            {/* Step 5: Muted Keywords */}
+            {step === 5 && (
               <div className="space-y-5">
                 <div>
                   <h2 className="text-lg sm:text-xl font-bold text-text mb-1">
-                    {t('onboarding.step4Title')}
+                    {t('onboarding.step5Title')}
                   </h2>
                   <p className="text-xs sm:text-sm text-text-muted">
-                    {t('onboarding.step4Desc')}
+                    {t('onboarding.step5Desc')}
                   </p>
                 </div>
 
@@ -434,7 +508,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             <div />
           )}
 
-          {step < 4 ? (
+          {step < 5 ? (
             <button
               onClick={() => setStep(step + 1)}
               className={`${THEME_CLASSES.buttonPrimary} px-6 py-2.5 text-sm font-semibold`}

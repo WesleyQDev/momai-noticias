@@ -38,6 +38,32 @@ describe('resolveUserProfile', () => {
     )
     expect(profile.followedSources).toEqual(['us-1'])
   })
+
+  it('deduplicates customSources, followedSources, and tickerTypes', () => {
+    const customSample: FeedSource = {
+      id: 'custom-dup',
+      title: 'Dup',
+      homepage: 'https://dup.example',
+      feed: 'https://dup.example/feed',
+      language: 'pt-BR',
+      topics: ['geral']
+    }
+    const profile = resolveUserProfile(
+      {
+        onboardingCompleted: true,
+        languages: ['pt-BR'],
+        followedSources: ['br-1', 'br-1', 'custom-dup'],
+        blockedSources: ['br-2', 'br-2'],
+        customSources: [customSample, { ...customSample }],
+        tickerTypes: ['quotes', 'quotes', 'polls']
+      },
+      curated
+    )
+    expect(profile.followedSources).toEqual(['br-1', 'custom-dup'])
+    expect(profile.blockedSources).toEqual(['br-2'])
+    expect(profile.customSources?.length).toBe(1)
+    expect(profile.tickerTypes).toEqual(['quotes', 'polls'])
+  })
 })
 
 describe('mergeCustomSources', () => {

@@ -42,7 +42,14 @@
     "like": "Gefällt mir",
     "dislike": "Gefällt mir nicht",
     "copied": "Link kopiert!",
-    "errorLoading": "Beim Laden der Nachrichten ist ein Fehler aufgetreten."
+    "errorLoading": "Beim Laden der Nachrichten ist ein Fehler aufgetreten.",
+    "ticker": {
+      "poll": "UMFRAGE",
+      "urgent": "EILMELDUNG",
+      "headline": "TOP-THEMA",
+      "ariaLabel": "Marktkurse und Eilmeldungen",
+      "quoteTitle": "Nachrichten zu {quote} anzeigen"
+    }
   },
   "topics": {
     "tecnologia": "Technologie",
@@ -56,6 +63,16 @@
     "mundo": "Welt",
     "geral": "Allgemein"
   },
+  "newsTypes": {
+    "quotes": "Finanzmarktkurse",
+    "quotesDesc": "Echtzeitkurse für Dollar, Euro, Indizes und Krypto.",
+    "polls": "Wahlumfragen",
+    "pollsDesc": "Zusammengefasste Ergebnisse und Zahlen führender Institute.",
+    "urgent": "Eilmeldungen & Wichtige News",
+    "urgentDesc": "Wichtige Entscheidungen, Notlagen und Eilmeldungen.",
+    "headlines": "Schlagzeilen & Top-News",
+    "headlinesDesc": "Die wichtigsten Leitartikel und Titelgeschichten."
+  },
   "onboarding": {
     "sourcesSelected": "{count} von {total} ausgewählt",
     "emptyMuted": "Noch keine stummgeschalteten Begriffe. Sie können dies jederzeit anpassen.",
@@ -65,10 +82,12 @@
     "step1Desc": "Sie sehen Nachrichten aus Quellen in den ausgewählten Sprachen.",
     "step2Title": "2. Interessen wählen",
     "step2Desc": "Wählen Sie Themen, die Sie am meisten interessieren.",
-    "step3Title": "3. Lieblingsquellen folgen",
-    "step3Desc": "Wählen Sie Zeitungen, Portale und Blogs, denen Sie folgen möchten.",
-    "step4Title": "4. Begriffe stummschalten (optional)",
-    "step4Desc": "Geben Sie Schlüsselwörter ein, die Sie nicht im Feed sehen möchten.",
+    "step3Title": "3. Nachrichtenarten & Ticker",
+    "step3Desc": "Wählen Sie, welche Inhalte in der Tickerleiste und im Feed erscheinen sollen.",
+    "step4Title": "4. Lieblingsquellen folgen",
+    "step4Desc": "Wählen Sie Zeitungen, Portale und Blogs, denen Sie folgen möchten.",
+    "step5Title": "5. Begriffe stummschalten (optional)",
+    "step5Desc": "Geben Sie Schlüsselwörter ein, die Sie nicht im Feed sehen möchten.",
     "mutedPlaceholder": "z.B. Spoiler, Klatsch (Eingabetaste drücken)",
     "addSourcePlaceholder": "Website oder RSS hinzufügen (z.B. spiegel.de)",
     "addSourceBtn": "Hinzufügen",
@@ -91,9 +110,11 @@
     "emptyMuted": "Keine stummgeschalteten Begriffe.",
     "cancel": "Abbrechen",
     "title": "Nachrichten-Einstellungen",
+    "typesDesc": "Wählen Sie Formate und Informationstypen für Feed und Ticker.",
     "tabs": {
       "sources": "Quellen",
       "topics": "Interessen",
+      "types": "Nachrichtenarten",
       "languages": "Sprachen",
       "muted": "Stummgeschaltet"
     },

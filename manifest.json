@@ -363,9 +363,23 @@
           }
         }
       }
+    },
+    {
+      "name": "get_ticker_data",
+      "label": "Obter Dados da Faixa de Notícias e Cotações",
+      "description": "Retorna cotações de mercado (dólar, euro, ibovespa) e manchetes urgentes ou pesquisas para a faixa ticker.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
     }
   ],
   "routes": [
+    {
+      "method": "GET",
+      "path": "/ticker",
+      "tool": "get_ticker_data"
+    },
     {
       "method": "GET",
       "path": "/feed",

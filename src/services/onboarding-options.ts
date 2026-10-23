@@ -35,3 +35,37 @@ export const CANONICAL_TOPICS: TopicOption[] = [
   { id: 'saude', labelKey: 'topics.saude', icon: '🏥' },
   { id: 'mundo', labelKey: 'topics.mundo', icon: '🌍' }
 ]
+
+export interface NewsTypeOption {
+  id: string
+  labelKey: string
+  descKey: string
+  icon: string
+}
+
+export const TICKER_NEWS_TYPES: NewsTypeOption[] = [
+  {
+    id: 'quotes',
+    labelKey: 'newsTypes.quotes',
+    descKey: 'newsTypes.quotesDesc',
+    icon: '💵'
+  },
+  {
+    id: 'polls',
+    labelKey: 'newsTypes.polls',
+    descKey: 'newsTypes.pollsDesc',
+    icon: '🗳️'
+  },
+  {
+    id: 'urgent',
+    labelKey: 'newsTypes.urgent',
+    descKey: 'newsTypes.urgentDesc',
+    icon: '🚨'
+  },
+  {
+    id: 'headlines',
+    labelKey: 'newsTypes.headlines',
+    descKey: 'newsTypes.headlinesDesc',
+    icon: '📰'
+  }
+]

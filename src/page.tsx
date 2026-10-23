@@ -417,6 +417,21 @@ export const NewsPage: React.FC<{ isActive?: boolean }> = ({ isActive: propIsAct
     scrollFeedToTop(scrollContainerRef.current)
   }
 
+  const handleQuoteClick = (quoteLabel: string) => {
+    const termMap: Record<string, string> = {
+      DÓLAR: 'Dólar',
+      DOLAR: 'Dólar',
+      EURO: 'Euro',
+      BITCOIN: 'Bitcoin',
+      IBOVESPA: 'Ibovespa'
+    }
+    const searchTerm = termMap[quoteLabel.toUpperCase()] || quoteLabel
+    setSelectedArticle(null)
+    setActiveTab('economia')
+    setSearchQuery(searchTerm)
+    scrollFeedToTop(scrollContainerRef.current)
+  }
+
   return (
     <div ref={scrollContainerRef} className={THEME_CLASSES.container}>
       {/* Top Header & Navigation */}
@@ -429,6 +444,8 @@ export const NewsPage: React.FC<{ isActive?: boolean }> = ({ isActive: propIsAct
         isRefreshing={isRefreshing}
         onOpenSettings={() => setShowSettings(true)}
         savedCount={savedArticles.length}
+        onArticleClick={handleArticleClick}
+        onQuoteClick={handleQuoteClick}
       />
 
       {/* Main Content Area */}

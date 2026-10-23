@@ -63,6 +63,7 @@ export interface UserProfile {
   retentionDays?: number
   autoSyncIntervalMinutes?: number
   lastSyncAt?: number
+  tickerTypes?: string[]
 }
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
@@ -78,7 +79,8 @@ export const DEFAULT_USER_PROFILE: UserProfile = {
   affinityByTopic: {},
   affinityByTerm: {},
   retentionDays: 3,
-  autoSyncIntervalMinutes: 15
+  autoSyncIntervalMinutes: 15,
+  tickerTypes: ['quotes', 'polls', 'urgent', 'headlines']
 }
 
 export interface FeedResponse {
@@ -104,3 +106,5 @@ export interface BriefingResponse {
   directResponse?: string
   error?: string
 }
+
+export type { MarketQuote, TickerItem, TickerResponse } from './market-ticker'

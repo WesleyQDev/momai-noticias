@@ -8,6 +8,8 @@ describe('Onboarding Fallback Rules', () => {
     expect(DEFAULT_USER_PROFILE.languages.length).toBeGreaterThan(0)
     expect(DEFAULT_USER_PROFILE.interests.length).toBeGreaterThan(0)
     expect(DEFAULT_USER_PROFILE.followedSources.length).toBeGreaterThan(0)
+    expect(DEFAULT_USER_PROFILE.tickerTypes).toBeDefined()
+    expect(DEFAULT_USER_PROFILE.tickerTypes).toEqual(['quotes', 'polls', 'urgent', 'headlines'])
   })
 
   it('should rank and return articles even if user skips onboarding without custom selections', () => {

@@ -39,6 +39,25 @@ export function resolveUserProfile(
     merged.followedSources = sourcesForLanguages(curatedSources, merged.languages)
   } else if (rawFollowed.length === 0 && !merged.onboardingCompleted) {
     merged.followedSources = sourcesForLanguages(curatedSources, merged.languages)
+  } else {
+    merged.followedSources = Array.from(new Set(merged.followedSources))
+  }
+
+  if (Array.isArray(merged.customSources)) {
+    const seen = new Set<string>()
+    merged.customSources = merged.customSources.filter((s) => {
+      if (!s || !s.id || seen.has(s.id)) return false
+      seen.add(s.id)
+      return true
+    })
+  }
+
+  if (Array.isArray(merged.blockedSources)) {
+    merged.blockedSources = Array.from(new Set(merged.blockedSources))
+  }
+
+  if (Array.isArray(merged.tickerTypes)) {
+    merged.tickerTypes = Array.from(new Set(merged.tickerTypes))
   }
 
   return merged

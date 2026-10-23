@@ -16,6 +16,7 @@ import { extractInterestTerms } from './src/services/interest-terms.ts'
 import { classifyTextToTopics } from './src/services/categories.ts'
 import { resolveUserProfile, mergeCustomSources } from './src/services/profile.ts'
 import { isPrivateNetworkUrl } from './src/services/url-safety.ts'
+import { fetchMarketQuotes, extractTickerArticles, buildTickerFeed } from './src/services/market-ticker.ts'
 import type { NewsArticle, FeedSource, UserProfile, CanonicalTopic, SavedArticle } from './src/services/types.ts'
 
 function safeSend(msg: any) {
@@ -121,7 +122,7 @@ async function readLimitedText(res: Response, maxBytes: number): Promise<string>
 }
 
 const USER_AGENT = 'MomAI-News-Reader/1.0 (+https://github.com/WesleyQDev/momai)'
-const FETCH_TIMEOUT_MS = 9000
+const FETCH_TIMEOUT_MS = 15000
 
 // Helper to get or initialize user profile
 async function getUserProfile(): Promise<UserProfile> {
@@ -180,47 +181,72 @@ async function fetchSingleFeed(source: FeedSource): Promise<NewsArticle[]> {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
 
-    const res = await fetch(source.feed, {
-      headers,
-      signal: controller.signal
-    })
-    clearTimeout(timer)
-
-    if (res.status === 304) {
-      // Not modified: keep the validators and refresh the freshness mark so
-      // the 15-minute sync filter does not refetch every feed again.
-      const cached = feedHttpCache.get(source.feed)
-      feedHttpCache.set(source.feed, {
-        etag: cached?.etag,
-        lastModified: cached?.lastModified,
-        lastFetchedAt: Date.now()
+    try {
+      const res = await fetch(source.feed, {
+        headers,
+        signal: controller.signal
       })
-      return []
+
+      if (res.status === 304) {
+        // Not modified: keep the validators and refresh the freshness mark so
+        // the 15-minute sync filter does not refetch every feed again.
+        const cached = feedHttpCache.get(source.feed)
+        feedHttpCache.set(source.feed, {
+          etag: cached?.etag,
+          lastModified: cached?.lastModified,
+          lastFetchedAt: Date.now()
+        })
+        return []
+      }
+
+      if (!res.ok) {
+        const cached = feedHttpCache.get(source.feed)
+        const isRateLimited = res.status === 429
+        feedHttpCache.set(source.feed, {
+          etag: cached?.etag,
+          lastModified: cached?.lastModified,
+          // Rate-limited feeds (429) get an extra 15-minute penalty to respect provider quotas
+          lastFetchedAt: Date.now() + (isRateLimited ? 15 * 60 * 1000 : 0)
+        })
+        console.warn(
+          isRateLimited
+            ? `[runtime:momai-noticias] Feed rate-limited (HTTP 429) for ${source.id}. Backing off.`
+            : `[runtime:momai-noticias] Feed HTTP ${res.status} for ${source.id} (${source.feed})`
+        )
+        return []
+      }
+
+      const etag = res.headers.get('etag') || undefined
+      const lastModified = res.headers.get('last-modified') || undefined
+      feedHttpCache.set(source.feed, { etag, lastModified, lastFetchedAt: Date.now() })
+
+      const contentType = res.headers.get('content-type') || ''
+      const arrayBuf = await res.arrayBuffer()
+      const xml = decodeFeedBuffer(Buffer.from(arrayBuf), contentType)
+      const parsed = parseFeedXml(xml, source)
+
+      // Store in memory (persistence is batched by performSyncActiveFeeds: one
+      // storage transaction per sync instead of one per feed).
+      for (const article of parsed) {
+        inMemoryArticles.set(article.id, article)
+      }
+
+      return parsed
+    } finally {
+      clearTimeout(timer)
     }
-
-    if (!res.ok) {
-      console.warn(`[runtime:momai-noticias] Feed HTTP ${res.status} for ${source.id} (${source.feed})`)
-      return []
-    }
-
-    const etag = res.headers.get('etag') || undefined
-    const lastModified = res.headers.get('last-modified') || undefined
-    feedHttpCache.set(source.feed, { etag, lastModified, lastFetchedAt: Date.now() })
-
-    const contentType = res.headers.get('content-type') || ''
-    const arrayBuf = await res.arrayBuffer()
-    const xml = decodeFeedBuffer(Buffer.from(arrayBuf), contentType)
-    const parsed = parseFeedXml(xml, source)
-
-    // Store in memory (persistence is batched by performSyncActiveFeeds: one
-    // storage transaction per sync instead of one per feed).
-    for (const article of parsed) {
-      inMemoryArticles.set(article.id, article)
-    }
-
-    return parsed
   } catch (err: any) {
-    console.warn(`[runtime:momai-noticias] Error fetching feed ${source.id}:`, err?.message || err)
+    const cached = feedHttpCache.get(source.feed)
+    feedHttpCache.set(source.feed, {
+      etag: cached?.etag,
+      lastModified: cached?.lastModified,
+      lastFetchedAt: Date.now()
+    })
+    if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
+      console.warn(`[runtime:momai-noticias] Feed ${source.id} timed out or was cancelled`)
+    } else {
+      console.warn(`[runtime:momai-noticias] Error fetching feed ${source.id}:`, err?.message || err)
+    }
     return []
   }
 }
@@ -894,6 +920,21 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
       const title = args?.title || feedInfo.title || 'Feed Personalizado'
       const language = args?.language || profile.languages[0] || 'pt-BR'
 
+      const existing = (profile.customSources || []).find(
+        (s) => s.feed === feedInfo.url || (s.homepage && s.homepage.toLowerCase() === url.toLowerCase())
+      )
+      if (existing) {
+        if (!profile.followedSources.includes(existing.id)) {
+          const updatedFollowed = Array.from(new Set([...profile.followedSources, existing.id]))
+          await saveUserProfile({ ...profile, followedSources: updatedFollowed })
+        }
+        return {
+          ok: true,
+          source: existing,
+          directResponse: `Fonte "${existing.title}" já está cadastrada!`
+        }
+      }
+
       const customId = `custom-${Date.now()}`
       const newSource: FeedSource = {
         id: customId,
@@ -906,8 +947,8 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
         enabled: true
       }
 
-      const updatedCustom = [...(profile.customSources || []), newSource]
-      const updatedFollowed = [...profile.followedSources, customId]
+      const updatedCustom = mergeCustomSources(profile.customSources, [newSource])
+      const updatedFollowed = Array.from(new Set([...profile.followedSources, customId]))
       const updatedProfile = { ...profile, customSources: updatedCustom, followedSources: updatedFollowed }
       await saveUserProfile(updatedProfile)
 
@@ -1152,6 +1193,33 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
         // Network failure is not a framing policy: let the reader try the page.
         return { ok: true, embeddable: true }
       }
+    }
+
+    case 'get_ticker_data': {
+      const profile = await getUserProfile()
+      const allowedTypes = profile.tickerTypes || ['quotes', 'polls', 'urgent', 'headlines']
+
+      const [quotes, articles] = await Promise.all([
+        allowedTypes.includes('quotes') ? fetchMarketQuotes() : Promise.resolve([]),
+        getAllArticles()
+      ])
+      let all = articles
+      try {
+        const recentCache = await storageBridge.collections.list<NewsArticle>('feed_cache', {
+          limit: 100,
+          orderBy: 'publishedAt'
+        })
+        if (Array.isArray(recentCache) && recentCache.length > 0) {
+          const map = new Map<string, NewsArticle>()
+          for (const a of all) if (a?.id) map.set(a.id, a)
+          for (const a of recentCache) if (a?.id) map.set(a.id, a)
+          all = Array.from(map.values())
+        }
+      } catch {}
+
+      const newsItems = extractTickerArticles(all, allowedTypes)
+      const items = buildTickerFeed(quotes, newsItems)
+      return { ok: true, items, updatedAt: Date.now() }
     }
 
     default:

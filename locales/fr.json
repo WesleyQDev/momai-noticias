@@ -42,7 +42,14 @@
     "like": "J'aime",
     "dislike": "Je n'aime pas",
     "copied": "Lien copié !",
-    "errorLoading": "Une erreur est survenue lors du chargement des actualités."
+    "errorLoading": "Une erreur est survenue lors du chargement des actualités.",
+    "ticker": {
+      "poll": "SONDAGE",
+      "urgent": "URGENT",
+      "headline": "À LA UNE",
+      "ariaLabel": "Bandeau des cours boursiers et actualités urgentes",
+      "quoteTitle": "Voir les actualités sur {quote}"
+    }
   },
   "topics": {
     "tecnologia": "Technologie",
@@ -56,6 +63,16 @@
     "mundo": "Monde",
     "geral": "Général"
   },
+  "newsTypes": {
+    "quotes": "Cours et Marchés Financiers",
+    "quotesDesc": "Cours en direct du Dollar, de l'Euro, des indices et des cryptos.",
+    "polls": "Sondages Électoraux",
+    "pollsDesc": "Résultats résumés et intentions de vote des principaux instituts.",
+    "urgent": "Actualités Urgentes & Alertes",
+    "urgentDesc": "Alertes de dernière minute, décisions de justice et événements majeurs.",
+    "headlines": "Titres et Grandes Lignes",
+    "headlinesDesc": "Principales actualités et manchettes du jour."
+  },
   "onboarding": {
     "sourcesSelected": "{count} sur {total} sélectionnées",
     "emptyMuted": "Aucun terme masqué pour le moment. Vous pouvez configurer cela à tout moment.",
@@ -65,10 +82,12 @@
     "step1Desc": "Vous verrez des actualités provenant de sources dans les langues sélectionnées.",
     "step2Title": "2. Sélectionnez vos intérêts",
     "step2Desc": "Choisissez les thèmes qui vous intéressent le plus.",
-    "step3Title": "3. Suivez vos sources favorites",
-    "step3Desc": "Sélectionnez les journaux, portails et blogs que vous souhaitez suivre.",
-    "step4Title": "4. Masquer des termes (optionnel)",
-    "step4Desc": "Tapez des mots-clés que vous préférez ne pas voir dans votre flux.",
+    "step3Title": "3. Types d'Actualités & Bandeau",
+    "step3Desc": "Choisissez les formats d'information affichés en direct dans le bandeau et le flux.",
+    "step4Title": "4. Suivez vos sources favorites",
+    "step4Desc": "Sélectionnez les journaux, portails et blogs que vous souhaitez suivre.",
+    "step5Title": "5. Masquer des termes (optionnel)",
+    "step5Desc": "Tapez des mots-clés que vous préférez ne pas voir dans votre flux.",
     "mutedPlaceholder": "Ex : spoilers, potins (appuyez sur Entrée)",
     "addSourcePlaceholder": "Ajouter un site ou flux RSS (ex : lemonde.fr)",
     "addSourceBtn": "Ajouter",
@@ -91,9 +110,11 @@
     "emptyMuted": "Aucun terme masqué.",
     "cancel": "Annuler",
     "title": "Préférences d'Actualités",
+    "typesDesc": "Sélectionnez les formats et types d'informations à afficher dans le flux et le bandeau.",
     "tabs": {
       "sources": "Sources",
       "topics": "Intérêts",
+      "types": "Types d'Actualités",
       "languages": "Langues",
       "muted": "Masqués"
     },

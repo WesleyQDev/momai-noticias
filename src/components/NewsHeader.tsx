@@ -3,6 +3,8 @@
 import React from 'react'
 import { useExtensionLocale } from '../services/i18n'
 import { NEWS_SECTIONS } from '../services/sections'
+import { NewsTickerBar } from './NewsTickerBar'
+import type { NewsArticle } from '../services/types'
 
 interface NewsHeaderProps {
   searchQuery: string
@@ -13,6 +15,8 @@ interface NewsHeaderProps {
   isRefreshing: boolean
   onOpenSettings: () => void
   savedCount: number
+  onArticleClick?: (article: NewsArticle) => void
+  onQuoteClick?: (quoteLabel: string) => void
 }
 
 const SECTIONS = NEWS_SECTIONS
@@ -25,7 +29,9 @@ export const NewsHeader: React.FC<NewsHeaderProps> = ({
   onRefresh,
   isRefreshing,
   onOpenSettings,
-  savedCount
+  savedCount,
+  onArticleClick,
+  onQuoteClick
 }) => {
   const { t } = useExtensionLocale()
 
@@ -132,6 +138,13 @@ export const NewsHeader: React.FC<NewsHeaderProps> = ({
           })}
         </nav>
       </div>
+
+      {/* Faixa de Cotações & Notícias Urgentes (News Ticker Bar) */}
+      <NewsTickerBar
+        onArticleClick={onArticleClick}
+        onQuoteClick={onQuoteClick}
+        isRefreshing={isRefreshing}
+      />
     </header>
   )
 }

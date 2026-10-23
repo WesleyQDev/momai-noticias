@@ -42,7 +42,14 @@
     "like": "Mi piace",
     "dislike": "Non mi piace",
     "copied": "Link copiato!",
-    "errorLoading": "Si è verificato un errore durante il caricamento delle notizie."
+    "errorLoading": "Si è verificato un errore durante il caricamento delle notizie.",
+    "ticker": {
+      "poll": "SONDAGGIO",
+      "urgent": "ULTIM'ORA",
+      "headline": "IN PRIMO PIANO",
+      "ariaLabel": "Striscia quotazioni di mercado e ultime notizie",
+      "quoteTitle": "Vedi notizie su {quote}"
+    }
   },
   "topics": {
     "tecnologia": "Tecnologia",
@@ -53,8 +60,18 @@
     "cultura": "Cultura e Spettacolo",
     "games": "Videogiochi",
     "saude": "Salute",
-    "mundo": "Mondo",
+    "mundo": "Mundo",
     "geral": "Generale"
+  },
+  "newsTypes": {
+    "quotes": "Quotazioni e Mercati",
+    "quotesDesc": "Prezzi in tempo reale di Dollaro, Euro, Borse e Criptovalute.",
+    "polls": "Sondaggi Elettorali",
+    "pollsDesc": "Risultati e intenzioni di voto riassunti dai principali istituti.",
+    "urgent": "Ultime Notizie e Avvisi",
+    "urgentDesc": "Avvisi dell'ultimo minuto, decisioni legali e fatti di forte impatto.",
+    "headlines": "Titoli e Prima Pagina",
+    "headlinesDesc": "Principali notizie e articoli di copertina dei quotidiani."
   },
   "onboarding": {
     "sourcesSelected": "{count} di {total} selezionate",
@@ -65,10 +82,12 @@
     "step1Desc": "Vedrai notizie dalle fonti nelle lingue selezionate.",
     "step2Title": "2. Seleziona i tuoi interessi",
     "step2Desc": "Scegli gli argomenti che ti interessano di più.",
-    "step3Title": "3. Segui le tue fonti preferite",
-    "step3Desc": "Scegli quali giornali, portali e blog desideri seguire.",
-    "step4Title": "4. Disattiva termini (opzionale)",
-    "step4Desc": "Inserisci parole chiave che preferisci non vedere nel feed.",
+    "step3Title": "3. Tipi di Notizie e Striscia",
+    "step3Desc": "Scegli quali formati di contenuto desideri visualizzare in tempo reale nella striscia e nel feed.",
+    "step4Title": "4. Segui le tue fonti preferite",
+    "step4Desc": "Scegli quali giornali, portali e blog desideri seguire.",
+    "step5Title": "5. Disattiva termini (opzionale)",
+    "step5Desc": "Inserisci parole chiave che preferisci non vedere nel feed.",
     "mutedPlaceholder": "Es: spoiler, gossip (premi Invio)",
     "addSourcePlaceholder": "Aggiungi sito o RSS (es: corriere.it)",
     "addSourceBtn": "Aggiungi",
@@ -91,9 +110,11 @@
     "emptyMuted": "Nessun termine nascosto.",
     "cancel": "Annulla",
     "title": "Preferenze Notizie",
+    "typesDesc": "Seleziona i formati e i tipi di informazioni da mostrare nel feed e nella striscia.",
     "tabs": {
       "sources": "Fonti",
       "topics": "Interessi",
+      "types": "Tipi di Notizie",
       "languages": "Lingue",
       "muted": "Disattivati"
     },

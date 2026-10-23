@@ -42,7 +42,14 @@
     "like": "Like",
     "dislike": "Dislike",
     "copied": "Link copied!",
-    "errorLoading": "An error occurred while loading news."
+    "errorLoading": "An error occurred while loading news.",
+    "ticker": {
+      "poll": "POLL",
+      "urgent": "BREAKING",
+      "headline": "FEATURED",
+      "ariaLabel": "Market quotes and breaking news ticker",
+      "quoteTitle": "View news about {quote}"
+    }
   },
   "topics": {
     "tecnologia": "Technology",
@@ -56,6 +63,16 @@
     "mundo": "World",
     "geral": "General"
   },
+  "newsTypes": {
+    "quotes": "Financial Market & Quotes",
+    "quotesDesc": "Real-time prices for Dollar, Euro, Stock Market (Ibovespa), and Bitcoin.",
+    "polls": "Election Polls",
+    "pollsDesc": "Summarized poll numbers and voting intentions from polling institutes.",
+    "urgent": "Urgent & Breaking News",
+    "urgentDesc": "Breaking alerts, major judicial decisions, and urgent updates.",
+    "headlines": "Featured Top Stories",
+    "headlinesDesc": "Top headlines and front-page stories from leading news sources."
+  },
   "onboarding": {
     "sourcesSelected": "{count} of {total} selected",
     "emptyMuted": "No muted terms yet. You can configure this at any time.",
@@ -65,10 +82,12 @@
     "step1Desc": "You will see news from sources in the selected languages.",
     "step2Title": "2. Select your interests",
     "step2Desc": "Pick the topics that interest you the most.",
-    "step3Title": "3. Follow your favorite sources",
-    "step3Desc": "Choose which portals, newspapers, and blogs you want to follow.",
-    "step4Title": "4. Mute keywords (optional)",
-    "step4Desc": "Enter keywords or subjects you prefer not to see in your feed.",
+    "step3Title": "3. News Types & Highlights",
+    "step3Desc": "Select which types of content you want to see in your feed and ticker banner.",
+    "step4Title": "4. Follow your favorite sources",
+    "step4Desc": "Choose which portals, newspapers, and blogs you want to follow.",
+    "step5Title": "5. Mute keywords (optional)",
+    "step5Desc": "Enter keywords or subjects you prefer not to see in your feed.",
     "mutedPlaceholder": "e.g., spoilers, celebrity gossip (press Enter)",
     "addSourcePlaceholder": "Add website or RSS (e.g. theverge.com)",
     "addSourceBtn": "Add",
@@ -91,9 +110,11 @@
     "emptyMuted": "No muted terms.",
     "cancel": "Cancel",
     "title": "News Preferences",
+    "typesDesc": "Choose which formats and types of news should be displayed in your feed and ticker banner.",
     "tabs": {
       "sources": "Sources",
       "topics": "Interests",
+      "types": "News Types",
       "languages": "Languages",
       "muted": "Muted"
     },

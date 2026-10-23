@@ -1,10 +1,10 @@
 // src/components/SourcesSettingsModal.tsx
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import type { UserProfile, CanonicalTopic, FeedSource } from '../services/types'
 import { useExtensionLocale, translateErrorCode } from '../services/i18n'
 import { THEME_CLASSES } from '../services/theme'
 import { newsApi } from '../services/api'
-import { AVAILABLE_LANGUAGES, CANONICAL_TOPICS } from '../services/onboarding-options'
+import { AVAILABLE_LANGUAGES, CANONICAL_TOPICS, TICKER_NEWS_TYPES } from '../services/onboarding-options'
 
 interface SourcesSettingsModalProps {
   profile: UserProfile
@@ -22,10 +22,13 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
   onClose
 }) => {
   const { t } = useExtensionLocale()
-  const [activeTab, setActiveTab] = useState<'sources' | 'topics' | 'languages' | 'muted'>('sources')
+  const [activeTab, setActiveTab] = useState<'sources' | 'topics' | 'types' | 'languages' | 'muted'>('sources')
 
   const [languages, setLanguages] = useState<string[]>(profile.languages || ['pt-BR'])
   const [interests, setInterests] = useState<CanonicalTopic[]>(profile.interests || ['tecnologia'])
+  const [tickerTypes, setTickerTypes] = useState<string[]>(
+    profile.tickerTypes || ['quotes', 'polls', 'urgent', 'headlines']
+  )
   const [followedSources, setFollowedSources] = useState<string[]>(profile.followedSources || [])
   const [blockedSources, setBlockedSources] = useState<string[]>(profile.blockedSources || [])
   const [mutedKeywords, setMutedKeywords] = useState<string[]>(profile.mutedKeywords || [])
@@ -39,6 +42,10 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
   // Sources added during this session, shown immediately even though the
   // server-side profile has not been re-fetched yet.
   const [addedSources, setAddedSources] = useState<FeedSource[]>([])
+
+  const toggleTickerType = (typeId: string) => {
+    setTickerTypes((prev) => (prev.includes(typeId) ? prev.filter((id) => id !== typeId) : [...prev, typeId]))
+  }
 
   const toggleLanguage = (code: string) => {
     setLanguages((prev) => (prev.includes(code) ? (prev.length > 1 ? prev.filter((c) => c !== code) : prev) : [...prev, code]))
@@ -100,13 +107,25 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
       followedSources,
       blockedSources,
       mutedKeywords,
-      retentionDays
+      retentionDays,
+      tickerTypes
     }
     onSave(updates)
     onClose()
   }
 
-  const allSources = [...curatedSources, ...(profile.customSources || []), ...addedSources]
+  const allSources = useMemo(() => {
+    const combined = [...curatedSources, ...(profile.customSources || []), ...addedSources]
+    const seen = new Set<string>()
+    const unique: FeedSource[] = []
+    for (const source of combined) {
+      if (source && source.id && !seen.has(source.id)) {
+        seen.add(source.id)
+        unique.push(source)
+      }
+    }
+    return unique
+  }, [curatedSources, profile.customSources, addedSources])
 
   return (
     <div className="w-full h-full flex flex-col bg-bg text-text font-sans overflow-hidden">
@@ -139,7 +158,7 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
 
       {/* Tab switcher */}
       <div className="flex border-b border-border bg-sidebar/50 px-6 text-xs font-medium shrink-0">
-        {(['sources', 'topics', 'languages', 'muted'] as const).map((tb) => (
+        {(['sources', 'topics', 'types', 'languages', 'muted'] as const).map((tb) => (
           <button
             key={tb}
             onClick={() => setActiveTab(tb)}
@@ -237,7 +256,7 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
                                 onClick={() => toggleFollowSource(source.id)}
                                 className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
                                   isFollowed
-                                    ? 'bg-accent text-white font-semibold shadow-xs'
+                                    ? 'bg-accent text-bg font-semibold shadow-xs'
                                     : 'bg-input text-text-muted hover:text-text'
                                 }`}
                               >
@@ -284,6 +303,51 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
                 </button>
               )
             })}
+          </div>
+        )}
+
+        {/* News Types Tab */}
+        {activeTab === 'types' && (
+          <div className="space-y-4 max-w-4xl">
+            <p className="text-text-muted text-xs mb-3">
+              {t('settings.typesDesc')}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {TICKER_NEWS_TYPES.map((typeOption) => {
+                const isSelected = tickerTypes.includes(typeOption.id)
+                return (
+                  <button
+                    key={typeOption.id}
+                    type="button"
+                    onClick={() => toggleTickerType(typeOption.id)}
+                    className={`flex items-start gap-3.5 p-4 rounded-xl border text-left transition-all select-none ${
+                      isSelected
+                        ? 'bg-accent/15 border-accent text-text shadow-xs'
+                        : 'bg-sidebar border-border text-text-muted hover:text-text'
+                    }`}
+                  >
+                    <span className="text-2xl shrink-0 mt-0.5">{typeOption.icon}</span>
+                    <div className="flex-1 min-w-0 pr-1">
+                      <div className="text-xs font-bold text-text mb-1">
+                        {t(typeOption.labelKey)}
+                      </div>
+                      <div className="text-[11px] text-text-muted leading-relaxed">
+                        {t(typeOption.descKey)}
+                      </div>
+                    </div>
+                    <div
+                      className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
+                        isSelected
+                          ? 'bg-accent text-bg shadow-xs'
+                          : 'bg-input text-text-muted border border-border/60'
+                      }`}
+                    >
+                      {isSelected ? '✓' : '+'}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
           </div>
         )}
 

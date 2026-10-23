@@ -213,4 +213,19 @@ describe('runtime tool handlers', () => {
     expect(table('feed_cache').has('old-1')).toBe(false)
     expect(table('feed_cache').has('fresh-1')).toBe(true)
   })
+
+  it('returns ticker data with market quotes and urgent or poll news', async () => {
+    const pollArt = article({
+      id: 'poll-1',
+      title: 'Datafolha: pesquisa eleitoral aponta disputa acirrada',
+      publishedAt: Date.now()
+    })
+    table('feed_cache').set(pollArt.id, pollArt)
+
+    const res = await runtime.executeTool('get_ticker_data')
+    expect(res.ok).toBe(true)
+    expect(Array.isArray(res.items)).toBe(true)
+    const hasPoll = res.items.some((i: any) => i.label === 'PESQUISA')
+    expect(hasPoll).toBe(true)
+  })
 })

@@ -42,7 +42,14 @@
     "like": "Gostei",
     "dislike": "Não gostei",
     "copied": "Link copiado!",
-    "errorLoading": "Ocorreu um erro ao carregar as notícias."
+    "errorLoading": "Ocorreu um erro ao carregar as notícias.",
+    "ticker": {
+      "poll": "PESQUISA",
+      "urgent": "URGENTE",
+      "headline": "DESTAQUE",
+      "ariaLabel": "Faixa de cotações e notícias urgentes",
+      "quoteTitle": "Ver notícias sobre {quote}"
+    }
   },
   "topics": {
     "tecnologia": "Tecnologia",
@@ -56,6 +63,16 @@
     "mundo": "Mundo",
     "geral": "Geral"
   },
+  "newsTypes": {
+    "quotes": "Cotações e Mercado Financeiro",
+    "quotesDesc": "Preço em tempo real do Dólar, Euro, Bolsa (Ibovespa) e Bitcoin.",
+    "polls": "Pesquisas Eleitorais",
+    "pollsDesc": "Números e intenções de voto resumidos dos institutos (Datafolha, Quaest, etc.).",
+    "urgent": "Notícias Urgentes e Plantão",
+    "urgentDesc": "Alertas de última hora, decisões judiciais, Selic e fatos de impacto.",
+    "headlines": "Destaques e Manchetes do Dia",
+    "headlinesDesc": "Principais notícias e matérias de capa dos jornais."
+  },
   "onboarding": {
     "sourcesSelected": "{count} de {total} selecionadas",
     "emptyMuted": "Nenhum termo silenciado ainda. Você pode configurar isso a qualquer momento.",
@@ -65,10 +82,12 @@
     "step1Desc": "Você verá notícias das fontes dos idiomas selecionados.",
     "step2Title": "2. Escolha seus interesses",
     "step2Desc": "Selecione os temas que mais chamam a sua atenção.",
-    "step3Title": "3. Siga suas fontes favoritas",
-    "step3Desc": "Escolha quais jornais, portais e blogs você quer acompanhar.",
-    "step4Title": "4. Silenciar termos (opcional)",
-    "step4Desc": "Digite palavras-chave ou assuntos que você prefere não ver no feed.",
+    "step3Title": "3. Tipos de Notícias e Destaques",
+    "step3Desc": "Selecione quais tipos de conteúdo você quer ver em tempo real no feed e letreiro.",
+    "step4Title": "4. Siga suas fontes favoritas",
+    "step4Desc": "Escolha quais jornais, portais e blogs você quer acompanhar.",
+    "step5Title": "5. Silenciar termos (opcional)",
+    "step5Desc": "Digite palavras-chave ou assuntos que você prefere não ver no feed.",
     "mutedPlaceholder": "Ex: spoilers, time X, fofoca (pressione Enter)",
     "addSourcePlaceholder": "Adicionar site ou RSS (ex: tecnoblog.net)",
     "addSourceBtn": "Adicionar",
@@ -91,9 +110,11 @@
     "emptyMuted": "Nenhum termo silenciado.",
     "cancel": "Cancelar",
     "title": "Preferências de Notícias",
+    "typesDesc": "Selecione quais formatos e tipos de informação devem ser exibidos no seu feed e letreiro.",
     "tabs": {
       "sources": "Fontes",
       "topics": "Interesses",
+      "types": "Tipos de Notícias",
       "languages": "Idiomas",
       "muted": "Silenciados"
     },
