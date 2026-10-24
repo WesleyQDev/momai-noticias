@@ -13,6 +13,7 @@ import { DEFAULT_USER_PROFILE } from './services/types'
 import { NewsHeader } from './components/NewsHeader'
 import { NewsFeed } from './components/NewsFeed'
 import { scrollFeedToTop } from './services/feed-scroll'
+import { resolveTabChange, DEFAULT_FEED_TAB } from './services/tabs'
 import { SavedArticlesView } from './components/SavedArticlesView'
 import { OnboardingModal } from './components/OnboardingModal'
 import { SourcesSettingsModal } from './components/SourcesSettingsModal'
@@ -51,6 +52,8 @@ export const NewsPage: React.FC<{ isActive?: boolean }> = ({ isActive: propIsAct
 
   const searchDebounceRef = useRef<any>(null)
   const refreshInFlightRef = useRef(false)
+  // Last feed section visited, so the saved button can toggle back to it.
+  const lastFeedTabRef = useRef<string>(DEFAULT_FEED_TAB)
 
   const initialLoadDone = useRef(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -408,9 +411,10 @@ export const NewsPage: React.FC<{ isActive?: boolean }> = ({ isActive: propIsAct
   }
 
   const handleTabChange = (newTab: string) => {
-    const normalizedTab = newTab === 'geral' ? 'paravoce' : newTab
+    const { tab, lastFeedTab } = resolveTabChange(activeTab, newTab, lastFeedTabRef.current)
+    lastFeedTabRef.current = lastFeedTab
     setSelectedArticle(null)
-    setActiveTab(normalizedTab)
+    setActiveTab(tab)
     if (searchQuery) {
       setSearchQuery('')
     }
@@ -426,6 +430,7 @@ export const NewsPage: React.FC<{ isActive?: boolean }> = ({ isActive: propIsAct
       IBOVESPA: 'Ibovespa'
     }
     const searchTerm = termMap[quoteLabel.toUpperCase()] || quoteLabel
+    lastFeedTabRef.current = 'economia'
     setSelectedArticle(null)
     setActiveTab('economia')
     setSearchQuery(searchTerm)
