@@ -206,7 +206,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             </div>
             <div className="h-2 w-full bg-sidebar rounded-full overflow-hidden border border-border/50">
               <div
-                className="h-full bg-accent transition-all duration-300 rounded-full"
+                className="h-full bg-text transition-all duration-300 rounded-full"
                 style={{ width: `${(step / 5) * 100}%` }}
               />
             </div>
@@ -232,10 +232,11 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     return (
                       <button
                         key={lang.code}
+                        type="button"
                         onClick={() => toggleLanguage(lang.code)}
                         className={`flex items-center justify-between p-4 rounded-xl border text-sm transition-all duration-200 ${
                           isSelected
-                            ? 'bg-accent/15 border-accent text-text shadow-xs font-semibold'
+                            ? 'bg-card border-text/60 ring-1 ring-text/20 text-text shadow-xs font-semibold'
                             : 'bg-sidebar border-border text-text-muted hover:text-text hover:border-border/80'
                         }`}
                       >
@@ -244,7 +245,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                           <span>{t(lang.labelKey)}</span>
                         </span>
                         {isSelected && (
-                          <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-bg">
+                          <div className="w-6 h-6 rounded-full bg-text flex items-center justify-center text-bg">
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
@@ -275,10 +276,11 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     return (
                       <button
                         key={topic.id}
+                        type="button"
                         onClick={() => toggleInterest(topic.id)}
                         className={`flex items-center gap-3 p-4 rounded-xl border text-left transition-all duration-200 text-sm ${
                           isSelected
-                            ? 'bg-accent/15 border-accent text-text shadow-xs font-semibold'
+                            ? 'bg-card border-text/60 ring-1 ring-text/20 text-text shadow-xs font-semibold'
                             : 'bg-sidebar border-border text-text-muted hover:text-text hover:border-border/80'
                         }`}
                       >
@@ -313,7 +315,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                         onClick={() => toggleTickerType(typeOption.id)}
                         className={`flex items-start gap-3.5 p-4 rounded-xl border text-left transition-all duration-200 select-none ${
                           isSelected
-                            ? 'bg-accent/15 border-accent text-text shadow-xs'
+                            ? 'bg-card border-text/60 ring-1 ring-text/20 text-text shadow-xs'
                             : 'bg-sidebar border-border text-text-muted hover:text-text hover:border-border/80'
                         }`}
                       >
@@ -329,7 +331,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                         <div
                           className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
                             isSelected
-                              ? 'bg-accent text-bg shadow-xs'
+                              ? 'bg-input text-text border border-border/80 font-medium'
                               : 'bg-input text-text-muted border border-border/60'
                           }`}
                         >
@@ -371,15 +373,16 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     onKeyDown={(e) => e.key === 'Enter' && handleAddCustomSource()}
                   />
                   <button
+                    type="button"
                     onClick={handleAddCustomSource}
                     disabled={isAddingCustom || !customUrl.trim()}
-                    className={THEME_CLASSES.buttonPrimary}
+                    className="bg-input hover:bg-border/30 text-text border border-border font-medium px-4 py-2 rounded-lg text-xs transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                   >
                     {isAddingCustom ? '...' : t('onboarding.addSourceBtn')}
                   </button>
                 </div>
                 {customMessage && (
-                  <p className={`text-xs ${customMessage.isError ? 'text-accent font-semibold' : 'text-text-muted'}`}>
+                  <p className={`text-xs ${customMessage.isError ? 'text-error font-semibold' : 'text-text-muted'}`}>
                     {customMessage.text}
                   </p>
                 )}
@@ -414,7 +417,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                                 onClick={() => toggleFollowSource(source.id)}
                                 className={`cursor-pointer flex items-center justify-between p-3 rounded-xl border transition-all select-none ${
                                   isFollowed
-                                    ? 'bg-accent/15 border-accent text-text shadow-xs font-semibold'
+                                    ? 'bg-card border-border shadow-xs'
                                     : 'bg-sidebar border-border text-text-muted hover:text-text'
                                 }`}
                               >
@@ -422,8 +425,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                                   <div className="text-xs truncate">{source.title}</div>
                                   <div className="text-[10px] text-text-muted truncate">{source.homepage?.replace(/^https?:\/\//, '')}</div>
                                 </div>
-                                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                                  isFollowed ? 'bg-accent text-bg' : 'bg-input text-text-muted'
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
+                                  isFollowed
+                                    ? 'bg-input text-text border border-border/80'
+                                    : 'bg-input/60 text-text-muted border border-border/40'
                                 }`}>
                                   {isFollowed ? '✓' : '+'}
                                 </div>
@@ -460,9 +465,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     onKeyDown={(e) => e.key === 'Enter' && handleAddKeyword()}
                   />
                   <button
+                    type="button"
                     onClick={handleAddKeyword}
                     disabled={!newKeyword.trim()}
-                    className={THEME_CLASSES.buttonPrimary}
+                    className="bg-input hover:bg-border/30 text-text border border-border font-medium px-4 py-2 rounded-lg text-xs transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                   >
                     {t('onboarding.addSourceBtn')}
                   </button>
@@ -481,8 +487,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       >
                         <span>{kw}</span>
                         <button
+                          type="button"
                           onClick={() => handleRemoveKeyword(kw)}
-                          className="text-text-muted hover:text-accent font-bold text-sm leading-none"
+                          className="text-text-muted hover:text-error font-bold text-sm leading-none"
                         >
                           ✕
                         </button>
@@ -499,6 +506,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
         <div className="pt-6 pb-4 flex items-center justify-between border-t border-border mt-8 shrink-0">
           {step > 1 ? (
             <button
+              type="button"
               onClick={() => setStep(step - 1)}
               className={THEME_CLASSES.buttonSecondary}
             >
@@ -510,15 +518,17 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
           {step < 5 ? (
             <button
+              type="button"
               onClick={() => setStep(step + 1)}
-              className={`${THEME_CLASSES.buttonPrimary} px-6 py-2.5 text-sm font-semibold`}
+              className="bg-text text-bg px-6 py-2.5 rounded-lg text-sm font-semibold transition-opacity hover:opacity-90 shadow-xs"
             >
               {t('onboarding.next')} →
             </button>
           ) : (
             <button
+              type="button"
               onClick={() => handleFinish(false)}
-              className={`${THEME_CLASSES.buttonPrimary} px-6 py-2.5 text-sm font-semibold shadow-md`}
+              className="bg-text text-bg px-6 py-2.5 rounded-lg text-sm font-semibold transition-opacity hover:opacity-90 shadow-md"
             >
               {t('onboarding.finish')} ✨
             </button>

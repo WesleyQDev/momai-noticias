@@ -141,12 +141,27 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
         </div>
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={onResetOnboarding}
-            className="text-xs text-accent font-semibold hover:underline px-3 py-1.5 rounded-lg bg-accent/15 border border-accent/30 transition-colors"
+            className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text px-3 py-1.5 rounded-lg bg-sidebar hover:bg-input border border-border font-medium transition-colors"
+            title={t('settings.redoSetup')}
           >
-            ↺ {t('settings.redoSetup')}
+            <svg
+              className="w-3.5 h-3.5 shrink-0"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+            </svg>
+            <span>{t('settings.redoSetup')}</span>
           </button>
           <button
+            type="button"
             onClick={onClose}
             className={`${THEME_CLASSES.buttonGhost} p-2`}
             title={t('app.back')}
@@ -161,10 +176,11 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
         {(['sources', 'topics', 'types', 'languages', 'muted'] as const).map((tb) => (
           <button
             key={tb}
+            type="button"
             onClick={() => setActiveTab(tb)}
             className={`py-3 px-5 border-b-2 font-semibold transition-colors ${
               activeTab === tb
-                ? 'border-accent text-accent'
+                ? 'border-text text-text'
                 : 'border-transparent text-text-muted hover:text-text'
             }`}
           >
@@ -190,9 +206,10 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
                   onKeyDown={(e) => e.key === 'Enter' && handleAddCustomSource()}
                 />
                 <button
+                  type="button"
                   onClick={handleAddCustomSource}
                   disabled={isAddingCustom || !customUrl.trim()}
-                  className={THEME_CLASSES.buttonPrimary}
+                  className="bg-text text-bg font-medium px-4 py-2 rounded-lg text-xs transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                 >
                   {isAddingCustom ? '...' : t('onboarding.addSourceBtn')}
                 </button>
@@ -206,7 +223,7 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
                 className={`w-full sm:w-72 ${THEME_CLASSES.input}`}
               />
             </div>
-            {customError && <p className="text-accent">{customError}</p>}
+            {customError && <p className="text-error text-xs">{customError}</p>}
 
             {/* Grouped by Languages */}
             <div className="space-y-6">
@@ -240,7 +257,11 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
                           <div
                             key={source.id}
                             className={`flex items-center justify-between p-3 rounded-xl border gap-2 transition-all ${
-                              isBlocked ? 'bg-sidebar/40 border-border/50 opacity-60' : 'bg-sidebar border-border'
+                              isBlocked
+                                ? 'bg-sidebar/40 border-border/50 opacity-60'
+                                : isFollowed
+                                ? 'bg-card border-border shadow-xs'
+                                : 'bg-sidebar border-border/60'
                             }`}
                           >
                             <div className="min-w-0 flex-1">
@@ -253,20 +274,22 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
                             </div>
                             <div className="flex items-center gap-1.5 shrink-0">
                               <button
+                                type="button"
                                 onClick={() => toggleFollowSource(source.id)}
-                                className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
+                                className={`px-2.5 py-1 rounded-lg text-[11px] transition-all ${
                                   isFollowed
-                                    ? 'bg-accent text-bg font-semibold shadow-xs'
-                                    : 'bg-input text-text-muted hover:text-text'
+                                    ? 'bg-input text-text border border-border/80 font-medium hover:bg-border/30 shadow-2xs'
+                                    : 'bg-sidebar/60 text-text-muted hover:text-text hover:bg-input border border-border/60 font-normal'
                                 }`}
                               >
                                 {isFollowed ? `✓ ${t('onboarding.following')}` : t('onboarding.follow')}
                               </button>
                               <button
+                                type="button"
                                 onClick={() => toggleBlockSource(source.id)}
                                 title={isBlocked ? t('settings.unblock') : t('settings.block')}
-                                className={`p-1 rounded text-xs ${
-                                  isBlocked ? 'text-accent font-bold' : 'text-text-muted hover:text-text'
+                                className={`p-1 rounded text-xs transition-colors ${
+                                  isBlocked ? 'text-error font-bold' : 'text-text-muted hover:text-text'
                                 }`}
                               >
                                 🚫
@@ -291,15 +314,21 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
               return (
                 <button
                   key={topic.id}
+                  type="button"
                   onClick={() => toggleInterest(topic.id)}
-                  className={`flex items-center gap-3 p-4 rounded-xl border text-left transition-all ${
+                  className={`flex items-center justify-between p-3.5 rounded-xl border text-left transition-all ${
                     isSelected
-                      ? 'bg-accent/15 border-accent text-text shadow-xs font-semibold'
-                      : 'bg-sidebar border-border text-text-muted hover:text-text'
+                      ? 'bg-card border-text/60 ring-1 ring-text/20 text-text shadow-xs font-semibold'
+                      : 'bg-sidebar border-border text-text-muted hover:text-text hover:border-border/80'
                   }`}
                 >
-                  <span className="text-xl">{topic.icon}</span>
-                  <span className="truncate">{t(topic.labelKey)}</span>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="text-xl shrink-0">{topic.icon}</span>
+                    <span className="truncate">{t(topic.labelKey)}</span>
+                  </div>
+                  {isSelected && (
+                    <span className="text-xs font-bold text-text shrink-0 ml-1.5">✓</span>
+                  )}
                 </button>
               )
             })}
@@ -322,8 +351,8 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
                     onClick={() => toggleTickerType(typeOption.id)}
                     className={`flex items-start gap-3.5 p-4 rounded-xl border text-left transition-all select-none ${
                       isSelected
-                        ? 'bg-accent/15 border-accent text-text shadow-xs'
-                        : 'bg-sidebar border-border text-text-muted hover:text-text'
+                        ? 'bg-card border-text/60 ring-1 ring-text/20 text-text shadow-xs'
+                        : 'bg-sidebar border-border text-text-muted hover:text-text hover:border-border/80'
                     }`}
                   >
                     <span className="text-2xl shrink-0 mt-0.5">{typeOption.icon}</span>
@@ -338,7 +367,7 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
                     <div
                       className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
                         isSelected
-                          ? 'bg-accent text-bg shadow-xs'
+                          ? 'bg-text text-bg shadow-xs'
                           : 'bg-input text-text-muted border border-border/60'
                       }`}
                     >
@@ -359,11 +388,12 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
               return (
                 <button
                   key={lang.code}
+                  type="button"
                   onClick={() => toggleLanguage(lang.code)}
                   className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
                     isSelected
-                      ? 'bg-accent/15 border-accent text-text font-semibold shadow-xs'
-                      : 'bg-sidebar border-border text-text-muted hover:text-text'
+                      ? 'bg-card border-text/60 ring-1 ring-text/20 text-text font-semibold shadow-xs'
+                      : 'bg-sidebar border-border text-text-muted hover:text-text hover:border-border/80'
                   }`}
                 >
                   <span className="flex items-center gap-3">
@@ -371,7 +401,7 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
                     <span>{t(lang.labelKey)}</span>
                   </span>
                   {isSelected && (
-                    <span className="text-accent font-bold text-sm">✓</span>
+                    <span className="text-text font-bold text-sm">✓</span>
                   )}
                 </button>
               )
@@ -392,9 +422,10 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
                 onKeyDown={(e) => e.key === 'Enter' && handleAddKeyword()}
               />
               <button
+                type="button"
                 onClick={handleAddKeyword}
                 disabled={!newKeyword.trim()}
-                className={THEME_CLASSES.buttonPrimary}
+                className="bg-text text-bg font-medium px-4 py-2 rounded-lg text-xs transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
               >
                 {t('onboarding.addSourceBtn')}
               </button>
@@ -413,8 +444,9 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
                   >
                     <span>{kw}</span>
                     <button
+                      type="button"
                       onClick={() => handleRemoveKeyword(kw)}
-                      className="text-text-muted hover:text-accent font-bold"
+                      className="text-text-muted hover:text-error font-bold"
                     >
                       ✕
                     </button>
@@ -428,10 +460,14 @@ export const SourcesSettingsModal: React.FC<SourcesSettingsModalProps> = ({
 
       {/* Footer */}
       <footer className="p-4 border-t border-border flex items-center justify-end gap-3 bg-card shrink-0">
-        <button onClick={onClose} className={THEME_CLASSES.buttonSecondary}>
+        <button type="button" onClick={onClose} className={THEME_CLASSES.buttonSecondary}>
           {t('settings.cancel')}
         </button>
-        <button onClick={handleSaveAll} className={THEME_CLASSES.buttonPrimary}>
+        <button
+          type="button"
+          onClick={handleSaveAll}
+          className="bg-text text-bg font-semibold px-5 py-2 rounded-lg text-xs transition-opacity hover:opacity-90 shadow-xs"
+        >
           {t('settings.saveChanges')}
         </button>
       </footer>
