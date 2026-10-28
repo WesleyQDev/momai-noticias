@@ -24,9 +24,7 @@ function safeSend(msg: any) {
     if (typeof process.send === 'function') {
       process.send(msg)
     }
-  } catch (err: any) {
-    console.warn('[runtime:momai-noticias] IPC send error:', err?.message || err)
-  }
+  } catch {}
 }
 
 // Persistent-worker mode is the only context where this module owns the
@@ -151,9 +149,7 @@ async function markLastSync(): Promise<void> {
     const current = await getUserProfile()
     current.lastSyncAt = Date.now()
     await saveUserProfile(current)
-  } catch (err: any) {
-    console.warn('[runtime:momai-noticias] Failed to persist lastSyncAt:', err?.message || err)
-  }
+  } catch {}
 }
 
 async function getSeenArticleIds(): Promise<Set<string>> {
@@ -208,11 +204,6 @@ async function fetchSingleFeed(source: FeedSource): Promise<NewsArticle[]> {
           // Rate-limited feeds (429) get an extra 15-minute penalty to respect provider quotas
           lastFetchedAt: Date.now() + (isRateLimited ? 15 * 60 * 1000 : 0)
         })
-        console.warn(
-          isRateLimited
-            ? `[runtime:momai-noticias] Feed rate-limited (HTTP 429) for ${source.id}. Backing off.`
-            : `[runtime:momai-noticias] Feed HTTP ${res.status} for ${source.id} (${source.feed})`
-        )
         return []
       }
 
@@ -235,18 +226,13 @@ async function fetchSingleFeed(source: FeedSource): Promise<NewsArticle[]> {
     } finally {
       clearTimeout(timer)
     }
-  } catch (err: any) {
+  } catch (_err: any) {
     const cached = feedHttpCache.get(source.feed)
     feedHttpCache.set(source.feed, {
       etag: cached?.etag,
       lastModified: cached?.lastModified,
       lastFetchedAt: Date.now()
     })
-    if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
-      console.warn(`[runtime:momai-noticias] Feed ${source.id} timed out or was cancelled`)
-    } else {
-      console.warn(`[runtime:momai-noticias] Error fetching feed ${source.id}:`, err?.message || err)
-    }
     return []
   }
 }
@@ -447,11 +433,7 @@ async function performSyncActiveFeeds(force: boolean): Promise<void> {
         'feed_cache',
         pendingPersistence.slice(i, i + PERSIST_CHUNK)
       )
-    } catch (err: any) {
-      console.warn(
-        `[runtime:momai-noticias] Failed to persist ${pendingPersistence.length} articles:`,
-        err?.message || err
-      )
+    } catch {
       break
     }
   }
@@ -522,9 +504,7 @@ async function pruneOldArticles(retentionDays = 3): Promise<void> {
       // Removed rows shift the next window left; only advance past survivors.
       offset += list.length - removedCount
     }
-  } catch (err: any) {
-    console.warn('[runtime:momai-noticias] Failed to prune feed_cache:', err?.message || err)
-  }
+  } catch {}
 }
 
 // Ensure articles are populated from in-memory or collection cache
@@ -559,9 +539,7 @@ async function getAllArticles(): Promise<NewsArticle[]> {
     if (cached.length > 0) {
       return cached
     }
-  } catch (err: any) {
-    console.warn('[runtime:momai-noticias] Failed to read feed_cache:', err?.message || err)
-  }
+  } catch {}
   return []
 }
 
@@ -576,9 +554,7 @@ async function getArticleFeedback(): Promise<Record<string, 'like' | 'dislike'>>
     if (stored && typeof stored === 'object' && !Array.isArray(stored)) {
       return stored as Record<string, 'like' | 'dislike'>
     }
-  } catch (err: any) {
-    console.warn('[runtime:momai-noticias] Failed to read article feedback:', err?.message || err)
-  }
+  } catch {}
   return {}
 }
 
@@ -589,9 +565,7 @@ async function saveArticleFeedback(map: Record<string, 'like' | 'dislike'>): Pro
       ? Object.fromEntries(entries.slice(entries.length - ARTICLE_FEEDBACK_LIMIT))
       : map
     await storageBridge.storage.set(ARTICLE_FEEDBACK_KEY, trimmed)
-  } catch (err: any) {
-    console.warn('[runtime:momai-noticias] Failed to save article feedback:', err?.message || err)
-  }
+  } catch {}
 }
 
 function feedbackWeight(type: 'like' | 'dislike' | null): number {
@@ -654,9 +628,7 @@ if (IS_PERSISTENT) {
         await syncActiveFeeds(cached.length === 0)
         await markLastSync()
       }
-    } catch (err: any) {
-      console.warn('[runtime:momai-noticias] Initial preload error:', err?.message || err)
-    }
+    } catch {}
   }, 10000)
 
   // Periodic background auto-sync & prune (every 15 minutes)
@@ -666,9 +638,7 @@ if (IS_PERSISTENT) {
       await syncActiveFeeds(false)
       await pruneOldArticles(profile.retentionDays || 3)
       await markLastSync()
-    } catch (err: any) {
-      console.warn('[runtime:momai-noticias] Auto sync error:', err?.message || err)
-    }
+    } catch {}
   }, 15 * 60 * 1000)
 }
 
@@ -708,18 +678,14 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
           syncing = true
           syncActiveFeeds(true)
             .then(() => markLastSync())
-            .catch((err) => {
-              console.warn('[runtime:momai-noticias] Background refresh sync error:', err?.message || err)
-            })
+            .catch(() => {})
         } else if (isSyncRunning) {
           syncing = true
         } else if (isStaleFeed) {
           syncing = true
           syncActiveFeeds(false)
             .then(() => markLastSync())
-            .catch((err) => {
-              console.warn('[runtime:momai-noticias] Background sync error:', err?.message || err)
-            })
+            .catch(() => {})
         }
       }
 
@@ -1155,9 +1121,11 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
       return discoverFeedUrl(url)
     }
 
-    // Used by the in-app reader before embedding a page: X-Frame-Options and
-    // CSP frame-ancestors are enforced by Chromium, so the UI needs to know
-    // beforehand whether the site can be framed at all.
+    // Used by the in-app reader before embedding a page.
+    // In MomAI (Electron), the host main process automatically strips X-Frame-Options
+    // and CSP frame-ancestors headers on all subFrame requests (apps/momai/src/main/index.ts).
+    // External websites are therefore embeddable directly in the in-app reader iframe.
+    // We only block internal/private addresses to prevent SSRF.
     case 'check_article_embed': {
       const url = String(args?.url || '').trim()
       if (!url) return { ok: false, error: 'URL obrigatória.' }
@@ -1170,29 +1138,9 @@ async function executeTool(toolName: string, args: Record<string, any> = {}): Pr
         return { ok: true, embeddable: false, reason: 'private_network' }
       }
 
-      try {
-        const controller = new AbortController()
-        const timer = setTimeout(() => controller.abort(), 6000)
-        const res = await fetch(url, {
-          method: 'GET',
-          redirect: 'follow',
-          headers: { 'User-Agent': USER_AGENT },
-          signal: controller.signal
-        })
-        clearTimeout(timer)
-      const policy = evaluateEmbedPolicy({
-        xFrameOptions: res.headers.get('x-frame-options'),
-        contentSecurityPolicy: res.headers.get('content-security-policy')
-      })
-      // Headers are all we need; release the body without downloading it.
-      res.body?.cancel().catch(() => {})
+      const policy = { embeddable: true }
       setCapped(embedPolicyCache, url, policy, EMBED_POLICY_CACHE_MAX)
       return { ok: true, ...policy }
-      } catch (err: any) {
-        console.warn('[runtime:momai-noticias] Embed check failed for', url, err?.message || err)
-        // Network failure is not a framing policy: let the reader try the page.
-        return { ok: true, embeddable: true }
-      }
     }
 
     case 'get_ticker_data': {

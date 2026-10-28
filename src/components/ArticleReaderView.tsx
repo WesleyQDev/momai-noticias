@@ -28,7 +28,7 @@ export const ArticleReaderView: React.FC<ArticleReaderViewProps> = ({
   const [copied, setCopied] = useState(false)
   const [isLoadingIframe, setIsLoadingIframe] = useState(true)
   const [iframeKey, setIframeKey] = useState(0)
-  const [embedStatus, setEmbedStatus] = useState<EmbedStatus>('checking')
+  const [embedStatus, setEmbedStatus] = useState<EmbedStatus>(() => (article.url ? 'embeddable' : 'blocked'))
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
   // Escape key handler to go back
@@ -42,13 +42,11 @@ export const ArticleReaderView: React.FC<ArticleReaderViewProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onBack])
 
-  // Ask the worker whether the site allows being framed (X-Frame-Options /
-  // CSP frame-ancestors). The check is header based, so any site is covered
-  // without a hardcoded list. A failed check does not block reading: the
-  // reader falls back to embedding and offers "open in browser".
+  // In MomAI (Electron), the host main process automatically strips X-Frame-Options
+  // and frame-ancestors headers on subFrame requests, so articles render directly
+  // inside the in-app iframe. We verify if the URL exists and is not a private IP.
   useEffect(() => {
     let alive = true
-    setEmbedStatus('checking')
     setIsLoadingIframe(true)
     setIframeKey(0)
 
@@ -60,14 +58,18 @@ export const ArticleReaderView: React.FC<ArticleReaderViewProps> = ({
       }
     }
 
+    setEmbedStatus('embeddable')
+
     newsApi
       .checkArticleEmbed(article.url)
       .then((res) => {
         if (!alive) return
-        setEmbedStatus(res.ok && res.embeddable === false ? 'blocked' : 'embeddable')
+        if (res.ok && res.embeddable === false) {
+          setEmbedStatus('blocked')
+        }
       })
       .catch(() => {
-        if (alive) setEmbedStatus('embeddable')
+        // Fallback: stay embeddable
       })
 
     return () => {
