@@ -12,20 +12,58 @@ import type {
   TickerResponse
 } from './types'
 
-export async function executeCommand<T = any>(toolName: string, args: Record<string, any> = {}, timeoutMs = 25000): Promise<T> {
-  try {
-    const res = await sdk.api.post('/extensions/momai-noticias/command', {
-      toolName,
-      args,
-      timeoutMs
-    })
-    const data = res?.data !== undefined ? res.data : res
-    return data as T
-  } catch (err: any) {
-    const serverError = err?.response?.data?.error || err?.response?.data?.message || err?.message || String(err)
-    console.error(`[momai-noticias:api] Command ${toolName} failed:`, serverError)
-    return { ok: false, error: serverError } as T
+const COALESCED_READ_COMMANDS = new Set([
+  'list_saved_articles',
+  'get_feed_feedback',
+  'get_profile',
+  'list_sources',
+  'get_ticker_data'
+])
+
+const inFlightReadCommands = new Map<string, Promise<any>>()
+
+function buildReadKey(toolName: string, args: Record<string, any>): string {
+  const keys = Object.keys(args).sort()
+  const normalized: Record<string, any> = {}
+  for (const k of keys) {
+    if (args[k] !== undefined) normalized[k] = args[k]
   }
+  return `${toolName}:${JSON.stringify(normalized)}`
+}
+
+export async function executeCommand<T = any>(toolName: string, args: Record<string, any> = {}, timeoutMs = 25000): Promise<T> {
+  const shouldCoalesce = COALESCED_READ_COMMANDS.has(toolName)
+  const key = shouldCoalesce ? buildReadKey(toolName, args) : ''
+  if (shouldCoalesce) {
+    const existing = inFlightReadCommands.get(key)
+    if (existing) return existing as Promise<T>
+  }
+
+  const run = (async () => {
+    try {
+      const res = await sdk.api.post('/extensions/momai-noticias/command', {
+        toolName,
+        args,
+        timeoutMs
+      })
+      const data = res?.data !== undefined ? res.data : res
+      return data as T
+    } catch (err: any) {
+      const serverError = err?.response?.data?.error || err?.response?.data?.message || err?.message || String(err)
+      console.error(`[momai-noticias:api] Command ${toolName} failed:`, serverError)
+      return { ok: false, error: serverError } as T
+    } finally {
+      if (shouldCoalesce) {
+        inFlightReadCommands.delete(key)
+      }
+    }
+  })()
+
+  if (shouldCoalesce) {
+    inFlightReadCommands.set(key, run)
+  }
+
+  return run
 }
 
 export const newsApi = {
