@@ -29,8 +29,8 @@
   "sdkVersion": 1,
   "momai_compat": ">=1.18.0",
   "readme": {
-    "pt-BR": "README.md",
-    "en-US": "README.en-US.md",
+    "pt-BR": "README.pt-BR.md",
+    "en-US": "README.md",
     "es": "README.es.md",
     "fr": "README.fr.md",
     "de": "README.de.md",
