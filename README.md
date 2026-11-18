@@ -1,22 +1,24 @@
-# MomAI Notícias
+# MomAI News
 
-Um leitor de notícias no estilo Google Discover, sem anúncios adicionados pelo MomAI e com os seus interesses no centro. A extensão baixa as notícias das fontes que você escolhe e organiza tudo no MomAI.
+**English** · [Português](README.pt-BR.md) · [Español](README.es.md) · [Français](README.fr.md) · [Italiano](README.it.md) · [Deutsch](README.de.md)
 
-## O que você pode fazer
+A Google Discover-style news reader with no ads added by MomAI and your interests at the center. The extension downloads stories from the sources you choose and organizes them in MomAI.
 
-- Escolher idiomas, temas e portais na primeira configuração.
-- Acompanhar mais de 35 fontes, como G1, Folha, BBC Brasil, Canaltech, InfoMoney, The Verge e Reuters.
-- Adicionar qualquer blog ou portal pelo link. A MomAI procura o feed RSS e cadastra a fonte.
-- Salvar matérias para ler depois.
-- Pedir um resumo do dia ou notícias sobre um assunto no chat.
+## What you can do
 
-## Exemplos
+- Pick languages, topics, and publishers during the first setup.
+- Follow more than 35 sources, such as BBC News, Reuters, The Verge, TechCrunch, and Wired.
+- Add any blog or news site by link. MomAI finds the RSS feed and adds the source.
+- Save stories to read later.
+- Ask for a daily briefing or news about a topic in chat.
 
-- "Quais são as principais notícias de tecnologia hoje?"
-- "Me dê um briefing do dia."
-- "O que saiu sobre astronomia recentemente?"
-- "Pesquise notícias sobre inteligência artificial."
+## Examples
 
-## Permissões
+- "What are the top tech stories today?"
+- "Give me a briefing on today's news."
+- "What came out about astronomy recently?"
+- "Search for news about artificial intelligence."
 
-- **Rede:** para baixar os feeds RSS e Atom das fontes que você acompanha. O histórico e os artigos salvos ficam no seu computador.
+## Permissions
+
+- **Network:** to download RSS and Atom feeds from the sources you follow. Your history and saved stories stay on your computer.
