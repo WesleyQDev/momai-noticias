@@ -1,7 +1,5 @@
 # MomAI Actualités
 
-[English](README.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · **Français** · [Italiano](README.it.md) · [Deutsch](README.de.md)
-
 Un lecteur d'actualités dans le style de Google Discover, sans publicité ajoutée par MomAI et avec vos centres d'intérêt au premier plan. L'extension télécharge les articles des sources que vous choisissez et les organise dans MomAI.
 
 ## Ce que vous pouvez faire

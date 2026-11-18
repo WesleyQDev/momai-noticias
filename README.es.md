@@ -1,7 +1,5 @@
 # MomAI Noticias
 
-[English](README.md) · [Português](README.pt-BR.md) · **Español** · [Français](README.fr.md) · [Italiano](README.it.md) · [Deutsch](README.de.md)
-
 Un lector de noticias al estilo de Google Discover, sin anuncios añadidos por MomAI y con tus intereses en el centro. La extensión descarga las noticias de las fuentes que eliges y las organiza en MomAI.
 
 ## Qué puedes hacer

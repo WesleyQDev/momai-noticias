@@ -1,7 +1,5 @@
 # MomAI Nachrichten
 
-[English](README.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [Français](README.fr.md) · [Italiano](README.it.md) · **Deutsch**
-
 Ein Nachrichtenleser im Stil von Google Discover, ohne von MomAI eingefügte Werbung und mit Ihren Interessen im Mittelpunkt. Die Erweiterung lädt Nachrichten aus den Quellen, die Sie auswählen, und ordnet sie in MomAI.
 
 ## Was Sie damit machen können
