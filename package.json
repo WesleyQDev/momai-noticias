@@ -1,6 +1,6 @@
 {
   "name": "momai-noticias",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "private": true,
   "type": "module",
   "description": "Feed de notícias personalizado e curado estilo Google Discover para MomAI",
