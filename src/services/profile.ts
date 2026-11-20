@@ -1,7 +1,7 @@
 // src/services/profile.ts
 // Pure profile helpers shared by the worker runtime and tests.
-import type { FeedSource, UserProfile } from './types'
-import { DEFAULT_USER_PROFILE } from './types'
+import type { FeedSource, UserProfile } from './types.ts'
+import { DEFAULT_USER_PROFILE } from './types.ts'
 
 const FALLBACK_LANGUAGE = 'pt-BR'
 
